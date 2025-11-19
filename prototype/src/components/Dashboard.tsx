@@ -1,15 +1,20 @@
+import { useState } from 'react';
 import { Card } from './ui/card';
+import { Button } from './ui/button';
 import { Progress } from './ui/progress';
+import { Badge } from './ui/badge';
 import { Activity, Moon, Footprints, Brain } from 'lucide-react';
 import { HealthMetric, Goal } from '../types/health';
+import { PrototypeQuickStart } from './PrototypeQuickStart';
 
 interface DashboardProps {
   todayData: HealthMetric | null;
   weekData: HealthMetric[];
   goals: Goal[];
+  onNavigate?: (tab: string) => void;
 }
 
-export function Dashboard({ todayData, weekData, goals }: DashboardProps) {
+export function Dashboard({ todayData, weekData, goals, onNavigate }: DashboardProps) {
   const calculateWeeklyProgress = (goal: Goal) => {
     const weekTotal = weekData.reduce((sum, day) => {
       switch (goal.type) {
@@ -31,14 +36,17 @@ export function Dashboard({ todayData, weekData, goals }: DashboardProps) {
 
   return (
     <div className="space-y-6">
+      {/* Quick Start Guide - Prototype Helper */}
+      <PrototypeQuickStart onNavigate={onNavigate || (() => {})} />
+
       {/* Today's Quick Stats */}
       <div>
         <h2 className="mb-4">Today at a Glance</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(10, 132, 255, 0.1)' }}>
-                <Footprints className="w-5 h-5" style={{ color: '#0A84FF' }} />
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <Footprints className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
                 <p className="text-muted-foreground">Steps</p>
@@ -49,8 +57,8 @@ export function Dashboard({ todayData, weekData, goals }: DashboardProps) {
 
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(125, 212, 176, 0.15)' }}>
-                <Moon className="w-5 h-5" style={{ color: '#7DD4B0' }} />
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <Moon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
                 <p className="text-muted-foreground">Sleep</p>
@@ -61,8 +69,8 @@ export function Dashboard({ todayData, weekData, goals }: DashboardProps) {
 
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(10, 132, 255, 0.1)' }}>
-                <Activity className="w-5 h-5" style={{ color: '#0A84FF' }} />
+              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
                 <p className="text-muted-foreground">Active</p>
@@ -73,8 +81,8 @@ export function Dashboard({ todayData, weekData, goals }: DashboardProps) {
 
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(125, 212, 176, 0.15)' }}>
-                <Brain className="w-5 h-5" style={{ color: '#7DD4B0' }} />
+              <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-lg">
+                <Brain className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
                 <p className="text-muted-foreground">Mindful</p>
@@ -99,13 +107,7 @@ export function Dashboard({ todayData, weekData, goals }: DashboardProps) {
                       <h4>{goal.description}</h4>
                       <p className="text-muted-foreground">Target: {goal.weeklyTarget} {goal.unit}</p>
                     </div>
-                    <span 
-                      className="px-2 py-1 rounded"
-                      style={{ 
-                        backgroundColor: progress >= 100 ? 'rgba(125, 212, 176, 0.2)' : 'rgba(10, 132, 255, 0.1)',
-                        color: progress >= 100 ? '#2C3639' : '#0A84FF'
-                      }}
-                    >
+                    <span className={`px-2 py-1 rounded ${progress >= 100 ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'}`}>
                       {Math.round(progress)}%
                     </span>
                   </div>
@@ -117,11 +119,16 @@ export function Dashboard({ todayData, weekData, goals }: DashboardProps) {
         </div>
       </div>
 
-      {/* Motivational Message */}
-      <Card className="p-6 border-none" style={{ background: 'linear-gradient(135deg, rgba(10, 132, 255, 0.08) 0%, rgba(125, 212, 176, 0.08) 100%)' }}>
-        <p className="text-center italic text-foreground">
-          "Your body is telling its story through data. Let's listen together with curiosity and compassion—not judgment. Every pattern is a clue, every deviation is an insight. 💙"
-        </p>
+      {/* Kriya Wisdom */}
+      <Card className="p-6 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-950 dark:via-blue-950 dark:to-indigo-950 border-purple-200 dark:border-purple-800">
+        <div className="text-center space-y-2">
+          <p className="italic">
+            "Every fluctuation in your health data is a story waiting to be understood."
+          </p>
+          <p className="text-muted-foreground">
+            🌙 Today's surprises become tomorrow's wisdom
+          </p>
+        </div>
       </Card>
     </div>
   );

@@ -16,12 +16,43 @@ export interface Goal {
   description: string;
 }
 
+// Context tag for morning forecast
+export interface ContextTag {
+  id: string;
+  label: string;
+  icon: string;
+  type: 'calendar' | 'weather' | 'feeling' | 'custom';
+}
+
+// Enhanced forecast with comfort zone
 export interface DailyForecast {
   date: string;
   metric: string;
   predicted: number;
+  comfortZoneMin?: number;
+  comfortZoneMax?: number;
   userAdjusted?: number;
   actual?: number;
+  contextTags?: ContextTag[];
+}
+
+// Attribution cause for Detective Mode
+export interface AttributionCause {
+  id: string;
+  label: string;
+  selected: boolean;
+  userInput?: string;
+}
+
+// What-If scenario for planning
+export interface WhatIfScenario {
+  id: string;
+  title: string;
+  description: string;
+  action: string;
+  probabilityIncrease: number;
+  sleepImpact?: 'none' | 'positive' | 'negative';
+  effortLevel: 'light' | 'moderate' | 'challenging';
 }
 
 export interface Reflection {
@@ -30,6 +61,9 @@ export interface Reflection {
   calibrationScore: number;
   notes: string;
   mood: string;
+  attributions?: AttributionCause[];
+  gracePointUsed?: boolean;
+  selectedScenario?: WhatIfScenario;
 }
 
 export interface ChatMessage {

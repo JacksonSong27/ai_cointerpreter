@@ -61,12 +61,12 @@ export function GoalsManager({ goals, onUpdateGoals }: GoalsManagerProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(10, 132, 255, 0.1)' }}>
-            <Target className="w-6 h-6" style={{ color: '#0A84FF' }} />
+          <div className="p-3 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg">
+            <Target className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2>Manage Your Goals</h2>
-            <p className="text-muted-foreground">Set flexible weekly intentions for your health</p>
+            <h2>Intentions Manager</h2>
+            <p className="text-muted-foreground">Set compassionate weekly budgets, not rigid targets</p>
           </div>
         </div>
         <Button onClick={() => setIsAdding(true)} disabled={isAdding}>
@@ -75,9 +75,9 @@ export function GoalsManager({ goals, onUpdateGoals }: GoalsManagerProps) {
         </Button>
       </div>
 
-      <Card className="p-4 border-none" style={{ background: 'linear-gradient(135deg, rgba(10, 132, 255, 0.05) 0%, rgba(150, 230, 194, 0.08) 100%)' }}>
-        <p className="italic text-foreground">
-          💡 <strong>Why "budgets" not "targets"?</strong> Think of your goals as flexible weekly budgets—you're setting intentions for the week, not rigid daily pass/fail checkpoints. Some days you'll spend more of your energy budget, some days less. That's not failure, that's being human! This is about learning patterns, not achieving perfection. 🌈
+      <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800">
+        <p className="italic">
+          💫 In Kriya, intentions are flexible budgets that adapt to your life's rhythm. They're learning tools for understanding your patterns, not performance metrics for judgment.
         </p>
       </Card>
 
@@ -200,14 +200,12 @@ export function GoalsManager({ goals, onUpdateGoals }: GoalsManagerProps) {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ 
-                        backgroundColor: goal.type === 'sleep' || goal.type === 'mindfulness' 
-                          ? '#96E6C2' 
-                          : '#0A84FF'
-                      }}
-                    />
+                    <div className={`w-3 h-3 rounded-full ${
+                      goal.type === 'sleep' ? 'bg-purple-500' :
+                      goal.type === 'steps' ? 'bg-blue-500' :
+                      goal.type === 'mindfulness' ? 'bg-amber-500' :
+                      'bg-green-500'
+                    }`} />
                     <h4 className="capitalize">{goal.type} Goal</h4>
                   </div>
                   <p className="mb-1">{goal.description}</p>
