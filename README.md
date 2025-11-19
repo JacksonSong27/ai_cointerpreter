@@ -117,11 +117,7 @@ The application uses mock health data generated in `src/lib/mockData.ts`:
 ## 🔧 Configuration
 
 ### Port Configuration
-By default, the app runs on port 8000. To change the port:
-
-```bash
-npm run dev -- --port 3000
-```
+By default, the app runs on port 8000. The port is configured in `vite.config.ts`. To change the port, edit the `server.port` value in the configuration file.
 
 ### Vite Configuration
 The `vite.config.ts` includes:
