@@ -35,10 +35,35 @@ export function ChatInterface({ healthData, compact = false }: ChatInterfaceProp
   const generateResponse = (userQuestion: string): string => {
     const lowerQ = userQuestion.toLowerCase();
     
+    // Helper function to check if keyword matches (handles typos by checking for partial matches)
+    const matchesKeyword = (keyword: string, text: string): boolean => {
+      // Exact match
+      if (text.includes(keyword)) return true;
+      
+      // For longer keywords (4+ chars), check for partial matches to handle typos
+      if (keyword.length >= 4) {
+        // Check if the first 3-4 characters of the keyword appear (handles missing ending letters)
+        const prefix = keyword.substring(0, Math.min(4, keyword.length - 1));
+        if (text.includes(prefix)) return true;
+        
+        // Check if at least 75% of the keyword characters appear consecutively
+        const minLength = Math.max(3, Math.floor(keyword.length * 0.75));
+        if (text.includes(keyword.substring(0, minLength))) return true;
+      } else {
+        // For short keywords (3 chars or less), require exact match
+        return text.includes(keyword);
+      }
+      
+      return false;
+    };
+    
+    // Check for variation-related terms (including typos like "vari")
+    const hasVariationTerm = /vari|fluctuat|inconsist|swing|jump|all over|pattern/.test(lowerQ);
+    
     // Define the 6 responses with their keyword sets
     const responses = [
       {
-        keywords: ['step', 'goal', 'meet', 'hit', 'reach', 'miss', 'didn\'t', 'not', 'failed', 'achieve'],
+        keywords: ['goal', 'meet', 'hit', 'reach', 'miss', 'didn\'t', 'not meet', 'failed', 'achieve', 'target', 'accomplish', 'short of', 'below goal', 'didn\'t reach'],
         response: `From what I can see, today had a few elements that often lower movement — a long meeting block, less sleep than usual, and the rainy afternoon. These aren't 'failures'; they're just parts of the day that shape rhythm. What do you think influenced your day the most?`
       },
       {
@@ -50,7 +75,7 @@ export function ChatInterface({ healthData, compact = false }: ChatInterfaceProp
         response: `I can't see everything, but I did notice a later-than-usual bedtime and a high-stress marker from your evening. Those patterns often affect sleep. Does that match your sense of the night?`
       },
       {
-        keywords: ['vary', 'varies', 'fluctuate', 'fluctuation', 'change', 'different', 'inconsistent', 'up', 'down'],
+        keywords: ['vary', 'varies', 'variation', 'fluctuate', 'fluctuation', 'inconsistent', 'inconsistency', 'swing', 'jump', 'all over', 'pattern'],
         response: `It's completely normal for movement to fluctuate. Weekends, weather, meetings, energy, and social plans all weave together. Your pattern looks more human than inconsistent.`
       },
       {
@@ -63,11 +88,16 @@ export function ChatInterface({ healthData, compact = false }: ChatInterfaceProp
       }
     ];
     
-    // Calculate match score for each response
+    // If variation term is detected, prioritize variation response immediately
+    if (hasVariationTerm) {
+      return responses[3].response; // Return variation response (index 3)
+    }
+    
+    // Calculate match score for each response (with typo handling)
     const scores = responses.map(({ keywords, response }) => {
       let score = 0;
       keywords.forEach(keyword => {
-        if (lowerQ.includes(keyword)) {
+        if (matchesKeyword(keyword, lowerQ)) {
           score++;
         }
       });
@@ -154,7 +184,7 @@ export function ChatInterface({ healthData, compact = false }: ChatInterfaceProp
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-green-600 dark:text-green-400">•</span>
-              <p className="text-sm text-muted-foreground">Metric fluctuations</p>
+              <p className="text-sm text-muted-foreground">Step variations</p>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-green-600 dark:text-green-400">•</span>
