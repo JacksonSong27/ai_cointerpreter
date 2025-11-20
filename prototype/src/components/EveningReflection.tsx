@@ -4,18 +4,19 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
 import { Checkbox } from './ui/checkbox';
-import { Sunset, TrendingUp, TrendingDown, Sparkles, Search, Lightbulb, Target, Heart, Lock, Sunrise } from 'lucide-react';
+import { Sunset, TrendingUp, TrendingDown, Sparkles, Search, Lightbulb, Target, Heart, Lock, Sunrise, Calendar } from 'lucide-react';
 import { DailyForecast, AttributionCause, WhatIfScenario } from '../types/health';
 import { calculateCalibrationScore, calculateSurpriseIndex, generateWhatIfScenarios, generateEveningScenarios } from '../lib/mockData';
 
 interface EveningReflectionProps {
   forecasts: DailyForecast[];
   onSaveReflection: (notes: string, mood: string) => void;
+  morningScenario?: string; // The scenario selected in the morning (A, B, C, or D)
 }
 
 type ReflectionStage = 'reveal' | 'detective' | 'whatif' | 'complete';
 
-export function EveningReflection({ forecasts, onSaveReflection }: EveningReflectionProps) {
+export function EveningReflection({ forecasts, onSaveReflection, morningScenario }: EveningReflectionProps) {
   const [stage, setStage] = useState<ReflectionStage>('reveal');
   const [reflectionNotes, setReflectionNotes] = useState('');
   const [selectedMood, setSelectedMood] = useState('');
@@ -55,11 +56,10 @@ export function EveningReflection({ forecasts, onSaveReflection }: EveningReflec
     setStage('whatif');
   };
 
-  const handleLockInScenario = () => {
-    if (selectedScenario) {
-      onSaveReflection(reflectionNotes, selectedMood);
-      setStage('complete');
-    }
+  const handleSubmitReflection = () => {
+    // Just save the reflection, don't navigate
+    onSaveReflection(reflectionNotes, selectedMood);
+    setStage('complete');
   };
 
   // Calculate metrics for primary forecast (steps)
@@ -74,6 +74,51 @@ export function EveningReflection({ forecasts, onSaveReflection }: EveningReflec
   // Generate scenarios
   const baselineProbability = 30;
   const scenarios = generateWhatIfScenarios('steps', baselineProbability);
+
+  // Evening scenarios that correspond to morning scenarios
+  const eveningScenarios = [
+    {
+      id: 'A',
+      title: 'Scenario A—Underperforming + Rain + Late Meeting',
+      context: 'Comfort Zone: 5,800–7,200. Actual: 4,510.',
+      aiResponse: 'That\'s a High Surprise (+75). Let\'s explore what might have caused today\'s dip: Your workshop ran 90 minutes late; Heavy rain started at 3 PM... Which of these do you think played the biggest role?',
+      comfortZone: [5800, 7200],
+      actual: 4510,
+      surpriseLevel: 75
+    },
+    {
+      id: 'B',
+      title: 'Scenario B—Overperforming + Sunshine + Errands',
+      context: 'Comfort Zone: 7,000–8,500. Actual: 11,230.',
+      aiResponse: 'That\'s a Positive Surprise! (+65) Your movement was higher than expected. Possible reasons: You walked to multiple errands; Sunny weather encouraged extra activity... Which factor feels most true for your day?',
+      comfortZone: [7000, 8500],
+      actual: 11230,
+      surpriseLevel: 65
+    },
+    {
+      id: 'C',
+      title: 'Scenario C—Flat Activity + Stress + No Outdoor Time',
+      context: 'Comfort Zone: 6,000–7,000. Actual: 3,220.',
+      aiResponse: 'That\'s a Moderate Surprise (+40). Possible causes: You tagged \'Stress\' in the afternoon; Calendar shows 5 straight hours of desk work... What feels like the X-Factor today?',
+      comfortZone: [6000, 7000],
+      actual: 3220,
+      surpriseLevel: 40
+    },
+    {
+      id: 'D',
+      title: 'Scenario D—Great Sleep but Low Steps',
+      context: 'Comfort Zone: 7,500–8,500. Actual: 5,120.',
+      aiResponse: 'Interesting—this is a Curious Surprise (+55). Even though you slept well, your activity was lower... Patterns like these often happen when: You work from home all day; You take long calls without moving... Which resonates most with your experience today?',
+      comfortZone: [7500, 8500],
+      actual: 5120,
+      surpriseLevel: 55
+    }
+  ];
+
+  // Get the evening scenario that matches the morning scenario
+  const matchedEveningScenario = morningScenario 
+    ? eveningScenarios.find(s => s.id === morningScenario)
+    : eveningScenarios[0]; // Default to Scenario A if no morning scenario selected
 
   // Act II: Outcome Reveal & Detective Mode
   if (stage === 'reveal' || stage === 'detective') {
@@ -174,8 +219,45 @@ export function EveningReflection({ forecasts, onSaveReflection }: EveningReflec
               </div>
             </Card>
 
+            {/* Evening Scenario Display */}
+            {matchedEveningScenario && (
+              <Card className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 border-indigo-200 dark:border-indigo-800">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <h4>{matchedEveningScenario.title}</h4>
+                  </div>
+                  
+                  {/* Context Display */}
+                  <div className="bg-white dark:bg-gray-900 p-4 rounded-lg">
+                    <p className="text-sm">
+                      <strong>Context:</strong> {matchedEveningScenario.context}
+                    </p>
+                  </div>
+                  
+                  {/* AI Response Box */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-2 border-green-200 dark:border-green-800 p-4 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-md">
+                        <Heart className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="text-sm mb-2">Kriya Says:</h5>
+                        <p className="text-sm leading-relaxed">
+                          {matchedEveningScenario.aiResponse}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            )}
+
             <Button 
-              onClick={() => setStage('detective')}
+              onClick={() => {
+                setStage('detective');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
             >
               <Search className="w-5 h-5 mr-2" />
@@ -281,11 +363,10 @@ export function EveningReflection({ forecasts, onSaveReflection }: EveningReflec
             </Card>
 
             <Button 
-              onClick={handleContinueToWhatIf}
+              onClick={handleSubmitReflection}
               className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
             >
-              <Lightbulb className="w-5 h-5 mr-2" />
-              Plan Tomorrow (What-If Mode)
+              Submit
             </Button>
           </>
         )}
@@ -429,37 +510,50 @@ export function EveningReflection({ forecasts, onSaveReflection }: EveningReflec
 
   // Complete Stage
   return (
-    <div className="space-y-6">
-      <Card className="p-8 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950 dark:via-emerald-950 dark:to-teal-950 border-green-200 dark:border-green-800 text-center">
-        <div className="space-y-4">
-          <div className="inline-block p-4 bg-white dark:bg-gray-800 rounded-full">
-            <Sparkles className="w-8 h-8 text-green-600 dark:text-green-400" />
+    <div className="space-y-6 flex items-center justify-center min-h-[60vh]">
+      <Card className="p-10 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950 dark:via-emerald-950 dark:to-teal-950 border-2 border-green-300 dark:border-green-700 text-center max-w-2xl mx-auto shadow-lg">
+        <div className="space-y-6">
+          <div className="inline-block p-5 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full shadow-lg">
+            <Sparkles className="w-10 h-10 text-white" />
           </div>
-          <div>
-            <h2>Reflection Complete</h2>
-            <p className="text-muted-foreground mt-2">
-              {selectedScenario 
-                ? `Tomorrow's plan: ${selectedScenario.title}` 
-                : "You've completed today's reflection"
-              }
+          
+          <div className="space-y-3">
+            <h2>✨ Reflection Complete ✨</h2>
+            <p className="text-muted-foreground text-lg">
+              Thank you for taking time to reflect on today
             </p>
           </div>
+          
           {gracePointUsed && (
-            <Badge className="bg-green-600 text-white">
-              <Heart className="w-3 h-3 mr-1" />
-              Grace Point Added
-            </Badge>
+            <div className="inline-block">
+              <Badge className="bg-green-600 text-white px-4 py-2 text-sm">
+                <Heart className="w-4 h-4 mr-2" />
+                Grace Point Added — You showed yourself compassion
+              </Badge>
+            </div>
           )}
-          <p className="italic text-muted-foreground">
-            "Today's surprises became tomorrow's wisdom 🌙"
-          </p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            variant="outline"
-            className="mt-4"
-          >
-            Return to Dashboard
-          </Button>
+          
+          <div className="py-4">
+            <div className="h-px bg-gradient-to-r from-transparent via-green-300 to-transparent dark:via-green-700" />
+          </div>
+          
+          <div className="space-y-3">
+            <p className="text-lg italic text-green-700 dark:text-green-300">
+              "Today's surprises became tomorrow's wisdom 🌙"
+            </p>
+          </div>
+
+          <Card className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 border-blue-200 dark:border-blue-700 mt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-center gap-2">
+                <Lightbulb className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h4>Ready to plan tomorrow?</h4>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Navigate to the <strong className="text-blue-600 dark:text-blue-400">Plan</strong> tab above to set up tomorrow's What-If scenarios and boost your success probability
+              </p>
+            </div>
+          </Card>
         </div>
       </Card>
     </div>

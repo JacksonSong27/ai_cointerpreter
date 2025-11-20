@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { Heart, Sunrise, Sunset, Target, Lightbulb, CheckCircle2, Info } from 'lucide-react';
+import { Heart, Sunrise, Sunset, Target, Lightbulb, Info, Calendar } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 interface PrototypeWelcomeProps {
@@ -67,29 +67,29 @@ export function PrototypeWelcome({ onStart }: PrototypeWelcomeProps) {
             </div>
           </Card>
 
-          <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-green-600 rounded-lg">
-                <Target className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h4 className="mb-1">Throughout the Day: Live Tracking</h4>
-                <p className="text-sm text-muted-foreground">
-                  Your dashboard shows real-time progress and what-if scenarios to help you make informed decisions about your health.
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 border-purple-200">
+          <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-purple-200">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-purple-500 rounded-lg">
                 <Sunset className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
-                <h4 className="mb-1">Act III: Evening Debrief</h4>
+                <h4 className="mb-1">Act II: Evening Debrief</h4>
                 <p className="text-sm text-muted-foreground">
-                  Use "Detective Mode" to explore what influenced your day. Reframe outcomes with compassion and plan for tomorrow.
+                  Use "Detective Mode" to explore what influenced your day. Reframe outcomes with compassion and celebrate what you learned.
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-blue-200">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <Calendar className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h4 className="mb-1">Act III: Plan Tomorrow</h4>
+                <p className="text-sm text-muted-foreground">
+                  Explore what-if scenarios and plan tomorrow with insight. See how different choices affect your probability of success.
                 </p>
               </div>
             </div>
@@ -98,79 +98,59 @@ export function PrototypeWelcome({ onStart }: PrototypeWelcomeProps) {
       )
     },
     {
-      title: "Key Features to Explore",
-      subtitle: "What makes Kriya different",
+      title: "Getting Started",
+      subtitle: "Four scenarios to explore",
       icon: <Lightbulb className="w-12 h-12 text-amber-600" />,
       content: (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Card className="p-4">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+          <p className="mb-4">
+            In this prototype, you'll experience <strong>four different daily scenarios</strong> that demonstrate how Kriya adapts to various contexts:
+          </p>
+          
+          <div className="grid grid-cols-1 gap-3">
+            <Card className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950">
+              <div className="flex items-start gap-3">
+                <Badge className="bg-blue-600 text-white shrink-0">A</Badge>
                 <div>
-                  <h4 className="text-sm mb-1">Comfort Zones, Not Targets</h4>
+                  <h4 className="text-sm mb-1">Rainy Day + Long Meeting</h4>
                   <p className="text-xs text-muted-foreground">
-                    Define flexible ranges instead of rigid goals
+                    Low sleep, challenging weather, busy schedule
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-4">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+            <Card className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950 dark:to-yellow-950">
+              <div className="flex items-start gap-3">
+                <Badge className="bg-amber-600 text-white shrink-0">B</Badge>
                 <div>
-                  <h4 className="text-sm mb-1">Causal Attribution</h4>
+                  <h4 className="text-sm mb-1">Sunny Day + Open Afternoon</h4>
                   <p className="text-xs text-muted-foreground">
-                    Explore what influences your health outcomes
+                    Good sleep, nice weather, light schedule
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-4">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+            <Card className="p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950 dark:to-orange-950">
+              <div className="flex items-start gap-3">
+                <Badge className="bg-red-600 text-white shrink-0">C</Badge>
                 <div>
-                  <h4 className="text-sm mb-1">Surprise Indicators</h4>
+                  <h4 className="text-sm mb-1">Heavy Stress + Poor Sleep</h4>
                   <p className="text-xs text-muted-foreground">
-                    Celebrate unexpected wins and learn from surprises
+                    Very low sleep, important presentation, stressed
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-4">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+            <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950">
+              <div className="flex items-start gap-3">
+                <Badge className="bg-green-600 text-white shrink-0">D</Badge>
                 <div>
-                  <h4 className="text-sm mb-1">What-If Planning</h4>
+                  <h4 className="text-sm mb-1">Weekend + Lots of Errands</h4>
                   <p className="text-xs text-muted-foreground">
-                    See how actions affect probability of success
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
-                <div>
-                  <h4 className="text-sm mb-1">Grace Points</h4>
-                  <p className="text-xs text-muted-foreground">
-                    Self-compassion for challenging days
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
-                <div>
-                  <h4 className="text-sm mb-1">Detective Mode</h4>
-                  <p className="text-xs text-muted-foreground">
-                    Investigate patterns without judgment
+                    Great sleep, active plans, weekend freedom
                   </p>
                 </div>
               </div>
@@ -179,7 +159,7 @@ export function PrototypeWelcome({ onStart }: PrototypeWelcomeProps) {
 
           <Card className="p-4 bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
             <p className="text-sm italic text-center">
-              💫 Remember: Kriya is designed around self-compassion and exploration, not performance metrics
+              💫 Pick one to start to see how Kriya's AI adapts its predictions and guidance
             </p>
           </Card>
         </div>
@@ -217,7 +197,7 @@ export function PrototypeWelcome({ onStart }: PrototypeWelcomeProps) {
           <p className="text-muted-foreground">{currentStep.subtitle}</p>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-8 h-[420px] overflow-y-auto">
           {currentStep.content}
         </div>
 

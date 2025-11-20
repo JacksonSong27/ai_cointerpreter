@@ -14,7 +14,7 @@ import { GoalsManager } from "./components/GoalsManager";
 import { KriyaScenarios } from "./components/KriyaScenarios";
 import { KriyaFeatures } from "./components/KriyaFeatures";
 import { FloatingChat } from "./components/FloatingChat";
-import { PrototypeWelcome } from "./components/PrototypeWelcome";
+import { PlanTomorrow } from "./components/PlanTomorrow";
 import {
   Activity,
   Sunrise,
@@ -25,6 +25,7 @@ import {
   Users,
   Info,
   Beaker,
+  Calendar,
 } from "lucide-react";
 import {
   generateMockHealthData,
@@ -39,7 +40,6 @@ import {
 import { Badge } from "./components/ui/badge";
 
 export default function App() {
-  const [showWelcome, setShowWelcome] = useState(true);
   const [prototypeMode, setPrototypeMode] = useState(true);
   const [healthData, setHealthData] = useState<HealthMetric[]>(
     [],
@@ -49,6 +49,7 @@ export default function App() {
     [],
   );
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [morningScenario, setMorningScenario] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     // Initialize with mock data
@@ -108,11 +109,6 @@ export default function App() {
 
   const todayData = healthData[healthData.length - 1] || null;
   const weekData = healthData.slice(-7);
-
-  // Show welcome screen first
-  if (showWelcome) {
-    return <PrototypeWelcome onStart={() => setShowWelcome(false)} />;
-  }
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -184,6 +180,13 @@ export default function App() {
                 <span>Evening</span>
               </TabsTrigger>
               <TabsTrigger
+                value="plan"
+                className="flex items-center gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-lg px-4"
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Plan</span>
+              </TabsTrigger>
+              <TabsTrigger
                 value="chat"
                 className="flex items-center gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-lg px-4"
               >
@@ -235,6 +238,8 @@ export default function App() {
               onLockIn={() => setActiveTab("dashboard")}
               goals={goals}
               weekData={weekData}
+              scenario={morningScenario}
+              setScenario={setMorningScenario}
             />
           </TabsContent>
 
@@ -242,6 +247,14 @@ export default function App() {
             <EveningReflection
               forecasts={forecasts}
               onSaveReflection={handleSaveReflection}
+              morningScenario={morningScenario}
+            />
+          </TabsContent>
+
+          <TabsContent value="plan" className="mt-0">
+            <PlanTomorrow
+              forecasts={forecasts}
+              morningScenario={morningScenario}
             />
           </TabsContent>
 
@@ -307,6 +320,17 @@ export default function App() {
         {/* Secondary Navigation - Swipe up to reveal */}
         <div className="border-t border-border bg-muted/30 px-4 py-2">
           <div className="flex items-center justify-center gap-6">
+            <button
+              onClick={() => setActiveTab("plan")}
+              className={`flex items-center gap-2 text-sm transition-colors ${
+                activeTab === "plan"
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Plan</span>
+            </button>
             <button
               onClick={() => setActiveTab("digest")}
               className={`flex items-center gap-2 text-sm transition-colors ${

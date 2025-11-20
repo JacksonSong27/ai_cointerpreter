@@ -1,6 +1,6 @@
 import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { Sunrise, Sunset, Target, X } from 'lucide-react';
+import { Sunrise, Sunset, Calendar, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface PrototypeQuickStartProps {
@@ -30,59 +30,41 @@ export function PrototypeQuickStart({ onNavigate }: PrototypeQuickStartProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <button
-            onClick={() => onNavigate('morning')}
-            className="text-left p-4 bg-white/80 dark:bg-gray-900/80 rounded-lg border border-orange-200 dark:border-orange-800 hover:shadow-md transition-all group"
-          >
+          <div className="p-4 bg-white/80 dark:bg-gray-900/80 rounded-lg border border-orange-200 dark:border-orange-800">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-orange-500 rounded-lg">
                 <Sunrise className="w-4 h-4 text-white" />
               </div>
-              <h4 className="text-sm">1. Morning Wager</h4>
+              <h4 className="text-sm">Act I: Morning Wager</h4>
             </div>
             <p className="text-xs text-muted-foreground">
               Set your comfort zones and see AI predictions for today
             </p>
-            <div className="mt-2 text-xs text-orange-600 dark:text-orange-400 group-hover:underline">
-              Go to Morning →
-            </div>
-          </button>
+          </div>
 
-          <button
-            onClick={() => onNavigate('evening')}
-            className="text-left p-4 bg-white/80 dark:bg-gray-900/80 rounded-lg border border-purple-200 dark:border-purple-800 hover:shadow-md transition-all group"
-          >
+          <div className="p-4 bg-white/80 dark:bg-gray-900/80 rounded-lg border border-purple-200 dark:border-purple-800">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-purple-500 rounded-lg">
                 <Sunset className="w-4 h-4 text-white" />
               </div>
-              <h4 className="text-sm">2. Evening Debrief</h4>
+              <h4 className="text-sm">Act II: Evening Debrief</h4>
             </div>
             <p className="text-xs text-muted-foreground">
               Use Detective Mode to reflect on your day with compassion
             </p>
-            <div className="mt-2 text-xs text-purple-600 dark:text-purple-400 group-hover:underline">
-              Go to Evening →
-            </div>
-          </button>
+          </div>
 
-          <button
-            onClick={() => onNavigate('goals')}
-            className="text-left p-4 bg-white/80 dark:bg-gray-900/80 rounded-lg border border-green-200 dark:border-green-800 hover:shadow-md transition-all group"
-          >
+          <div className="p-4 bg-white/80 dark:bg-gray-900/80 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-green-600 rounded-lg">
-                <Target className="w-4 h-4 text-white" />
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <Calendar className="w-4 h-4 text-white" />
               </div>
-              <h4 className="text-sm">3. Check Goals</h4>
+              <h4 className="text-sm">Act III: Plan Tomorrow</h4>
             </div>
             <p className="text-xs text-muted-foreground">
-              Review your weekly progress and adjust your targets
+              Explore what-if scenarios and plan for tomorrow
             </p>
-            <div className="mt-2 text-xs text-green-600 dark:text-green-400 group-hover:underline">
-              View Goals →
-            </div>
-          </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between pt-3 border-t border-border">
