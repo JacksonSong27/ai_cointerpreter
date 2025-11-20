@@ -61,6 +61,7 @@ ai_cointerpreter/
 ### Core Functionality
 - **Morning Intention Setting**: Set daily health goals
 - **Evening Reflection**: Review and reflect on daily progress
+- **Plan Tomorrow**: Capture next-day actions immediately after nightly review
 - **Chat Interface**: Conversational AI for health data interpretation
 - **Dashboard**: Visual overview of health metrics
 - **Weekly Goals Management**: Set and track weekly objectives
@@ -85,15 +86,22 @@ The chat interface uses **predefined responses** based on keyword matching, not 
 ## 🛠️ Available Scripts
 
 ```bash
-# Start development server
+# Start development server (opens http://localhost:8000)
 npm run dev
 
 # Build for production
 npm run build
 
-# Preview production build
+# Preview production build output
 npm run preview
 ```
+
+## 🔄 Development Workflow
+
+- Use `npm install` inside `prototype/` after pulling new dependencies.
+- Run `npm run dev` to iterate locally; Vite serves the app at `http://localhost:8000`.
+- Update `prototype/vite.config.ts` if you need to change the port or open behavior.
+- Commit and push changes from the repository root so shared config and docs stay in sync.
 
 ## 🎨 Tech Stack
 
