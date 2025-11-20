@@ -22,6 +22,7 @@ export interface ContextTag {
   label: string;
   icon: string;
   type: 'calendar' | 'weather' | 'feeling' | 'custom';
+  active?: boolean;
 }
 
 // Enhanced forecast with comfort zone

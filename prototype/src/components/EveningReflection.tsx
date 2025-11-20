@@ -4,7 +4,8 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
 import { Checkbox } from './ui/checkbox';
-import { Sunset, TrendingUp, TrendingDown, Sparkles, Search, Lightbulb, Target, Heart, Lock, Sunrise, Calendar } from 'lucide-react';
+import { Progress } from './ui/progress';
+import { Sunset, TrendingUp, TrendingDown, Sparkles, Search, Lightbulb, Target, Heart, Lock, Sunrise, Calendar, PieChart } from 'lucide-react';
 import { DailyForecast, AttributionCause, WhatIfScenario } from '../types/health';
 import { calculateCalibrationScore, calculateSurpriseIndex, generateWhatIfScenarios, generateEveningScenarios } from '../lib/mockData';
 
@@ -84,7 +85,13 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
       aiResponse: 'That\'s a High Surprise (+75). Let\'s explore what might have caused today\'s dip: Your workshop ran 90 minutes late; Heavy rain started at 3 PM... Which of these do you think played the biggest role?',
       comfortZone: [5800, 7200],
       actual: 4510,
-      surpriseLevel: 75
+      surpriseLevel: 75,
+      causes: [
+        { label: 'Workshop ran long', weight: 40, detail: 'Blocked your usual afternoon walk' },
+        { label: 'Heavy rain', weight: 25, detail: 'Cuts outdoor movement by 1.2k steps for you' },
+        { label: 'Low sleep carryover', weight: 10, detail: 'Energy dips after <6h nights' },
+        { label: 'Other factors', weight: 25, detail: 'Use Detective Mode to tag what fits' },
+      ],
     },
     {
       id: 'B',
@@ -93,7 +100,13 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
       aiResponse: 'That\'s a Positive Surprise! (+65) Your movement was higher than expected. Possible reasons: You walked to multiple errands; Sunny weather encouraged extra activity... Which factor feels most true for your day?',
       comfortZone: [7000, 8500],
       actual: 11230,
-      surpriseLevel: 65
+      surpriseLevel: 65,
+      causes: [
+        { label: 'Errand chaining', weight: 30, detail: 'Three stops = +2k incidental steps' },
+        { label: 'Sunny weather', weight: 20, detail: 'You average 15% more movement on clear days' },
+        { label: 'Open afternoon', weight: 25, detail: 'Calendar gaps invite spontaneous walks' },
+        { label: 'Mood boost', weight: 25, detail: 'Tagged “energized” this morning' },
+      ],
     },
     {
       id: 'C',
@@ -102,7 +115,13 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
       aiResponse: 'That\'s a Moderate Surprise (+40). Possible causes: You tagged \'Stress\' in the afternoon; Calendar shows 5 straight hours of desk work... What feels like the X-Factor today?',
       comfortZone: [6000, 7000],
       actual: 3220,
-      surpriseLevel: 40
+      surpriseLevel: 40,
+      causes: [
+        { label: 'Desk marathon', weight: 35, detail: '5h seated block removes your walking loop' },
+        { label: 'Stress flag', weight: 25, detail: 'Stress days = slower pace + fewer breaks' },
+        { label: 'Skipped outdoor time', weight: 20, detail: 'You usually log 1k steps outside' },
+        { label: 'Other context', weight: 20, detail: 'Add notes so I can learn what shifted' },
+      ],
     },
     {
       id: 'D',
@@ -111,7 +130,13 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
       aiResponse: 'Interesting—this is a Curious Surprise (+55). Even though you slept well, your activity was lower... Patterns like these often happen when: You work from home all day; You take long calls without moving... Which resonates most with your experience today?',
       comfortZone: [7500, 8500],
       actual: 5120,
-      surpriseLevel: 55
+      surpriseLevel: 55,
+      causes: [
+        { label: 'WFH flow', weight: 35, detail: 'Home days average 2k fewer steps' },
+        { label: 'Long calls', weight: 20, detail: 'Two 60-min calls overlap movement windows' },
+        { label: 'Weekend comedown', weight: 15, detail: 'After active days you often reset lower' },
+        { label: 'Other signals', weight: 30, detail: 'Layer your own explanation below' },
+      ],
     }
   ];
 
@@ -250,6 +275,35 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
                     </div>
                   </div>
                 </div>
+              </Card>
+            )}
+
+            {matchedEveningScenario?.causes && (
+              <Card className="p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <PieChart className="w-4 h-4 text-purple-600" />
+                  <h4 className="text-sm uppercase tracking-wide text-muted-foreground">
+                    Surprise breakdown
+                  </h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Kriya weighed today&apos;s context to guess what nudged your steps. Use this as a starting hypothesis.
+                </p>
+                <div className="space-y-3">
+                  {matchedEveningScenario.causes.map((cause) => (
+                    <div key={cause.label}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span>{cause.label}</span>
+                        <span className="text-muted-foreground">{cause.weight}%</span>
+                      </div>
+                      <Progress value={cause.weight} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-1">{cause.detail}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Not seeing your reason? Tag it in Detective Mode so future explanations feel more tailored.
+                </p>
               </Card>
             )}
 

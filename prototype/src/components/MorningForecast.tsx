@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Slider } from './ui/slider';
 import { Progress } from './ui/progress';
-import { Sunrise, TrendingUp, Calendar, Cloud, Heart, Plus, Lock, Lightbulb, Target, Award, CheckCircle2 } from 'lucide-react';
+import { Input } from './ui/input';
+import { Sunrise, TrendingUp, Calendar, Heart, Plus, Lock, Lightbulb, Target, Award, CheckCircle2, Sparkles } from 'lucide-react';
 import { DailyForecast, ContextTag, WhatIfScenario, Goal, HealthMetric } from '../types/health';
-import { generateContextTags, generateMorningScenarios } from '../lib/mockData';
+import { generateContextTags } from '../lib/mockData';
 
 interface MorningForecastProps {
   forecasts: DailyForecast[];
@@ -23,11 +24,8 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
   const [contextTags, setContextTags] = useState<ContextTag[]>(generateContextTags());
   const [customTag, setCustomTag] = useState('');
   const [locked, setLocked] = useState(false);
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const [selectedContext, setSelectedContext] = useState<string | null>(null);
-  
-  const baselineProbability = 30;
-  const scenarios = generateMorningScenarios(baselineProbability);
+  const [selectedPresets, setSelectedPresets] = useState<Record<string, string>>({});
 
   // Context scenarios data
   const contextScenarios = [
@@ -37,7 +35,13 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
       context: 'Rainy, 3-hour workshop (2–5 PM), Sleep: 6.1 hours (below baseline).',
       aiResponse: 'Good morning! I pulled in your context for today... Based on patterns like these, I\'m forecasting ~6,500 steps today. Let\'s set today\'s Comfort Zone together—what range feels realistic?',
       predictedSteps: 6500,
-      predictedSleep: 6.5
+      predictedSleep: 6.1,
+      comfortNote: 'Rain + stacked meetings usually lowers your steps by ~18%.',
+      factors: [
+        { id: 'sleep', label: 'Sleep', value: '6.1h', insight: '↓ vs 7.2h avg' },
+        { id: 'weather', label: 'Weather', value: 'Rain + 49°F', insight: 'Likely indoor day' },
+        { id: 'calendar', label: 'Calendar', value: '3h workshop', insight: 'Few movement breaks' },
+      ],
     },
     {
       id: 'B',
@@ -45,7 +49,13 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
       context: 'Sunny, Only a 30-min stand-up, Sleep: 7.8 hours (above baseline).',
       aiResponse: 'Good morning! Today looks pretty open... Given this, I\'m forecasting ~8,900 steps. Where would you like your Comfort Zone to be today?',
       predictedSteps: 8900,
-      predictedSleep: 7.5
+      predictedSleep: 7.8,
+      comfortNote: 'Sun + open calendar tends to give you +2K bonus steps.',
+      factors: [
+        { id: 'sleep', label: 'Sleep', value: '7.8h', insight: '↑ rested' },
+        { id: 'weather', label: 'Weather', value: 'Sunny 68°F', insight: 'Outdoor friendly' },
+        { id: 'calendar', label: 'Calendar', value: '30-min stand-up', insight: 'Lots of free time' },
+      ],
     },
     {
       id: 'C',
@@ -53,7 +63,13 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
       context: 'Sleep: 4.9 hours, Difficult morning presentation, Mood: Marked "Stressed."',
       aiResponse: 'Good morning. I see you slept less than usual and have an important morning presentation... I\'m forecasting ~4,700 steps. Let\'s set a gentle Comfort Zone for today.',
       predictedSteps: 4700,
-      predictedSleep: 7.0
+      predictedSleep: 4.9,
+      comfortNote: 'Short sleep + pressure morning = conserve energy day.',
+      factors: [
+        { id: 'sleep', label: 'Sleep', value: '4.9h', insight: 'Recovery needed' },
+        { id: 'mood', label: 'Mood', value: 'Stressed', insight: 'Go gentle' },
+        { id: 'calendar', label: 'Calendar', value: 'High-stakes presentation', insight: 'Mental load ↑' },
+      ],
     },
     {
       id: 'D',
@@ -61,9 +77,59 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
       context: 'Saturday, Mild weather, Calendar: Grocery trip + walking dog + park outing, Sleep: 8.3 hours.',
       aiResponse: 'Happy Saturday! It looks like a more active day... Based on your past weekends, I forecast ~10,500 steps. Where would you like your Comfort Zone today?',
       predictedSteps: 10500,
-      predictedSleep: 8.0
+      predictedSleep: 8.3,
+      comfortNote: 'Weekend errands often push you into the confident zone.',
+      factors: [
+        { id: 'sleep', label: 'Sleep', value: '8.3h', insight: 'Banked rest' },
+        { id: 'calendar', label: 'Calendar', value: 'Errands + dog walk', insight: 'Built-in movement' },
+        { id: 'weather', label: 'Weather', value: 'Mild & dry', insight: 'Invites outdoor time' },
+      ],
     }
   ];
+
+  const stepsForecast = forecasts.find(f => f.metric === 'steps');
+  const sleepForecast = forecasts.find(f => f.metric === 'sleep');
+
+  useEffect(() => {
+    if (scenario && scenario !== selectedContext) {
+      setSelectedContext(scenario);
+    }
+  }, [scenario, selectedContext]);
+
+  useEffect(() => {
+    if (!selectedContext && stepsForecast) {
+      setComfortZones((prev) => {
+        if (prev.steps) return prev;
+        return {
+          ...prev,
+          steps: [
+            Math.max(3000, stepsForecast.predicted - 1500),
+            Math.min(15000, stepsForecast.predicted + 1500),
+          ],
+        };
+      });
+    }
+  }, [selectedContext, stepsForecast]);
+
+  useEffect(() => {
+    if (!selectedContext && sleepForecast) {
+      setComfortZones((prev) => {
+        if (prev.sleep) return prev;
+        return {
+          ...prev,
+          sleep: [
+            Math.max(5, sleepForecast.predicted - 0.5),
+            Math.min(10, sleepForecast.predicted + 0.5),
+          ],
+        };
+      });
+    }
+  }, [selectedContext, sleepForecast]);
+
+  const activeScenario = useMemo(
+    () => (selectedContext ? contextScenarios.find(s => s.id === selectedContext) : undefined),
+    [selectedContext],
+  );
 
   const handleContextSelect = (scenarioId: string) => {
     setSelectedContext(scenarioId);
@@ -76,20 +142,34 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
     const scenario = contextScenarios.find(s => s.id === scenarioId);
     if (scenario) {
       // Update comfort zones based on selected scenario
-      setComfortZones({
-        steps: [Math.max(3000, scenario.predictedSteps - 1500), Math.min(15000, scenario.predictedSteps + 1500)],
-        sleep: [Math.max(5, scenario.predictedSleep - 0.5), Math.min(10, scenario.predictedSleep + 0.5)]
+      setComfortZones((prev) => ({
+        ...prev,
+        steps: [
+          Math.max(3000, scenario.predictedSteps - 1500),
+          Math.min(15000, scenario.predictedSteps + 1500),
+        ],
+        sleep: [
+          Math.max(5, scenario.predictedSleep - 0.5),
+          Math.min(10, scenario.predictedSleep + 0.5),
+        ],
+      }));
+      setSelectedPresets((prev) => {
+        const next = { ...prev };
+        delete next.steps;
+        delete next.sleep;
+        return next;
       });
     }
   };
 
   const handleComfortZoneChange = (metric: string, values: number[]) => {
     setComfortZones({ ...comfortZones, [metric]: [values[0], values[1]] });
+    setSelectedPresets((prev) => ({ ...prev, [metric]: 'custom' }));
   };
 
   const handleLockIn = () => {
     // Save all comfort zones as forecasts
-    Object.entries(comfortZones).forEach(([metric, [min, max]]) => {
+    (Object.entries(comfortZones) as [string, [number, number]][]).forEach(([metric, [min, max]]) => {
       const midpoint = (min + max) / 2;
       onSaveForecast(metric, midpoint);
     });
@@ -110,7 +190,8 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
         id: Date.now().toString(),
         label: customTag,
         icon: '✨',
-        type: 'custom'
+        type: 'custom',
+        active: true,
       };
       setContextTags([...contextTags, newTag]);
       setCustomTag('');
@@ -118,11 +199,96 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
   };
 
   const removeTag = (id: string) => {
-    setContextTags(contextTags.filter(tag => tag.id !== id));
+    setContextTags((prev) => prev.filter(tag => tag.id !== id));
   };
 
-  const stepsForecast = forecasts.find(f => f.metric === 'steps');
-  const sleepForecast = forecasts.find(f => f.metric === 'sleep');
+  const toggleContextTag = (id: string) => {
+    setContextTags((prev) =>
+      prev.map((tag) =>
+        tag.id === id ? { ...tag, active: !(tag.active ?? true) } : tag,
+      ),
+    );
+  };
+
+  const activeContextTags = contextTags.filter(tag => tag.active !== false);
+
+  const stepsBaseline = activeScenario?.predictedSteps || stepsForecast?.predicted || 6500;
+  const sleepBaseline = activeScenario?.predictedSleep || sleepForecast?.predicted || 7;
+
+  const stepPresets = useMemo(() => {
+    if (!stepsBaseline) return [];
+    const clampRange = (minOffset: number, maxOffset: number): [number, number] => {
+      const min = Math.max(3000, Math.round(stepsBaseline + minOffset));
+      const max = Math.min(15000, Math.round(stepsBaseline + maxOffset));
+      if (max - min < 500) {
+        return [min, Math.min(15000, min + 500)];
+      }
+      return [min, max];
+    };
+    return [
+      {
+        id: 'gentle',
+        label: 'Gentle Day',
+        description: 'Protect energy',
+        range: clampRange(-2500, -500),
+      },
+      {
+        id: 'steady',
+        label: 'Steady Pace',
+        description: 'Match your norm',
+        range: clampRange(-1000, 1000),
+      },
+      {
+        id: 'ambitious',
+        label: 'Confident Push',
+        description: 'Lean into momentum',
+        range: clampRange(0, 2000),
+      },
+    ];
+  }, [stepsBaseline]);
+
+  const sleepPresets = useMemo(() => {
+    if (!sleepBaseline) return [];
+    const clampRange = (minOffset: number, maxOffset: number): [number, number] => {
+      const min = Math.max(5, Math.round((sleepBaseline + minOffset) * 10) / 10);
+      const max = Math.min(10, Math.round((sleepBaseline + maxOffset) * 10) / 10);
+      if (max - min < 0.5) {
+        return [min, Math.min(10, min + 0.5)];
+      }
+      return [min, max];
+    };
+    return [
+      {
+        id: 'recover',
+        label: 'Recovery Focus',
+        description: 'Add extra rest',
+        range: clampRange(0.2, 0.8),
+      },
+      {
+        id: 'steady-sleep',
+        label: 'Steady Night',
+        description: 'Match recent average',
+        range: clampRange(-0.2, 0.2),
+      },
+      {
+        id: 'aligned',
+        label: 'Ambitious Sleep',
+        description: 'Nudge toward goals',
+        range: clampRange(0.4, 1),
+      },
+    ];
+  }, [sleepBaseline]);
+
+  const handlePresetSelect = (metric: 'steps' | 'sleep', range: [number, number], presetId: string) => {
+    setComfortZones((prev) => ({
+      ...prev,
+      [metric]: range,
+    }));
+    setSelectedPresets((prev) => ({
+      ...prev,
+      [metric]: presetId,
+    }));
+  };
 
   // Calculate weekly goal progress
   const calculateWeeklyProgress = (goal: Goal) => {
@@ -209,6 +375,68 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
         )}
       </div>
 
+      {/* Context Signals */}
+      <Card className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-emerald-200 dark:border-emerald-700">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <h4 className="text-sm">Signals you're noticing today</h4>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={customTag}
+                onChange={(e) => setCustomTag(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addCustomTag();
+                  }
+                }}
+                placeholder="Add your own cue…"
+                className="h-9 text-sm"
+              />
+              <Button size="sm" variant="outline" onClick={addCustomTag} disabled={!customTag.trim()}>
+                <Plus className="w-4 h-4 mr-1" />
+                Add
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {contextTags.map((tag) => {
+              const isActive = tag.active !== false;
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleContextTag(tag.id)}
+                  className={`group relative flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs shadow-sm transition-colors ${
+                    isActive
+                      ? 'border-emerald-400 bg-white/80 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-50'
+                      : 'border-border text-muted-foreground'
+                  }`}
+                >
+                  <span>{tag.icon}</span>
+                  <span>{tag.label}</span>
+                  {tag.type === 'custom' && (
+                    <span
+                      className="ml-1 text-[10px] opacity-60 hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeTag(tag.id);
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </Card>
+
       {/* Kriya Says Section - Only show when scenario selected */}
       {selectedContext && (() => {
         const scenario = contextScenarios.find(s => s.id === selectedContext);
@@ -230,6 +458,52 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
           </Card>
         ) : null;
       })()}
+
+      {selectedContext && activeScenario && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-amber-500" />
+              <h4 className="text-sm uppercase tracking-wide text-muted-foreground">Context cues Kriya used</h4>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {activeScenario.factors?.map((factor) => (
+                <div key={factor.id} className="rounded-xl border p-3 bg-muted/30">
+                  <p className="text-xs text-muted-foreground">{factor.label}</p>
+                  <p className="text-lg font-semibold">{factor.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{factor.insight}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {activeScenario.comfortNote}
+            </p>
+          </Card>
+
+          <Card className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-4 h-4 text-blue-600" />
+              <h4 className="text-sm uppercase tracking-wide text-muted-foreground">Reflection breadcrumbs</h4>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {activeContextTags.length > 0 ? (
+                activeContextTags.map((tag) => (
+                  <Badge key={tag.id} className="bg-white/80 dark:bg-slate-900/60 border border-blue-200 dark:border-blue-800">
+                    {tag.icon} {tag.label}
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Add or activate a few cues above to capture today's story.
+                </p>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              These breadcrumbs reappear this evening so you can compare expectations vs. reality with compassion.
+            </p>
+          </Card>
+        </div>
+      )}
 
       {/* Only show the rest if a scenario is selected */}
       {selectedContext && (
@@ -345,9 +619,7 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
                   <p className="text-muted-foreground mb-2">AI Baseline Prediction</p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl">
-                      {selectedContext 
-                        ? contextScenarios.find(s => s.id === selectedContext)?.predictedSteps.toLocaleString()
-                        : stepsForecast.predicted.toLocaleString()}
+                      {(selectedContext ? activeScenario?.predictedSteps : stepsForecast?.predicted)?.toLocaleString() ?? '—'}
                     </span>
                     <span className="text-muted-foreground">steps</span>
                   </div>
@@ -357,6 +629,37 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
                 </div>
 
                 <div className="space-y-4">
+                  {stepPresets.length > 0 && (
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                        One-tap comfort ranges
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {stepPresets.map((preset) => {
+                          const isActive = selectedPresets.steps === preset.id;
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => handlePresetSelect('steps', preset.range, preset.id)}
+                              className={`rounded-xl border px-3 py-3 text-left text-sm transition-colors ${
+                                isActive
+                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/50'
+                                  : 'border-border hover:border-blue-200 dark:hover:border-blue-800'
+                              }`}
+                            >
+                              <p className="font-semibold">{preset.label}</p>
+                              <p className="text-xs text-muted-foreground">{preset.description}</p>
+                              <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                                {preset.range[0].toLocaleString()} - {preset.range[1].toLocaleString()}
+                              </p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <div className="flex justify-between mb-3">
                       <span>Your Comfort Zone</span>
@@ -404,7 +707,7 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
                 <div className="bg-purple-50 dark:bg-purple-950 p-4 rounded-lg">
                   <p className="text-muted-foreground mb-2">AI Baseline Prediction</p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl">{sleepForecast.predicted.toFixed(1)}</span>
+                    <span className="text-3xl">{(sleepForecast?.predicted)?.toFixed(1) ?? '—'}</span>
                     <span className="text-muted-foreground">hours</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
@@ -413,6 +716,37 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
                 </div>
 
                 <div className="space-y-4">
+                  {sleepPresets.length > 0 && (
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                        Choose a tone for tonight
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {sleepPresets.map((preset) => {
+                          const isActive = selectedPresets.sleep === preset.id;
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => handlePresetSelect('sleep', preset.range, preset.id)}
+                              className={`rounded-xl border px-3 py-3 text-left text-sm transition-colors ${
+                                isActive
+                                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/60'
+                                  : 'border-border hover:border-purple-200 dark:hover:border-purple-800'
+                              }`}
+                            >
+                              <p className="font-semibold">{preset.label}</p>
+                              <p className="text-xs text-muted-foreground">{preset.description}</p>
+                              <p className="text-xs text-purple-700 dark:text-purple-300 mt-1">
+                                {preset.range[0].toFixed(1)} - {preset.range[1].toFixed(1)} hrs
+                              </p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <div className="flex justify-between mb-3">
                       <span>Your Comfort Zone</span>
