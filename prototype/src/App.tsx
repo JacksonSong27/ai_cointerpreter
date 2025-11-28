@@ -154,7 +154,7 @@ export default function App() {
                   KRIYA
                 </h1>
                 <p className="text-xs text-muted-foreground hidden sm:block">
-                  Your AI Health Companion
+                Your AI partner in care
                 </p>
               </div>
             </div>

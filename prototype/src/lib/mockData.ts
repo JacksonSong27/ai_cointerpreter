@@ -79,12 +79,12 @@ export function calculateSurpriseIndex(predicted: number, actual: number): numbe
 // Generate context tags based on day and conditions
 export function generateContextTags(): ContextTag[] {
   const allTags: ContextTag[] = [
-    { id: '1', label: '3hr workshop', icon: '📅', type: 'calendar' },
-    { id: '2', label: 'Rainy weather', icon: '🌧️', type: 'weather' },
-    { id: '3', label: 'Feeling tired', icon: '😴', type: 'feeling' },
-    { id: '4', label: 'Lunch plans', icon: '🍽️', type: 'calendar' },
-    { id: '5', label: 'Clear skies', icon: '☀️', type: 'weather' },
-    { id: '6', label: 'Energized', icon: '⚡', type: 'feeling' },
+    { id: '1', label: '3hr workshop', icon: '📅', type: 'calendar', active: true },
+    { id: '2', label: 'Rainy weather', icon: '🌧️', type: 'weather', active: true },
+    { id: '3', label: 'Feeling tired', icon: '😴', type: 'feeling', active: true },
+    { id: '4', label: 'Lunch plans', icon: '🍽️', type: 'calendar', active: true },
+    { id: '5', label: 'Clear skies', icon: '☀️', type: 'weather', active: true },
+    { id: '6', label: 'Energized', icon: '⚡', type: 'feeling', active: true },
   ];
   
   // Return random 2-3 tags
