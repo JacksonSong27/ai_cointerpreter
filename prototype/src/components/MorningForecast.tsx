@@ -71,7 +71,7 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
     },
     {
       id: 'D',
-      title: 'Scenario D — Weekend + Lots of Errands',
+      title: 'Scenario D—Weekend + Lots of Errands',
       contextSections: [
         { label: 'Day Type', content: 'It\'s Saturday' },
         { label: 'Sleep', content: 'Alex slept 8.3 hours' },

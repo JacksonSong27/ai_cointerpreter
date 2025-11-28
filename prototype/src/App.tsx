@@ -154,7 +154,7 @@ export default function App() {
                   KRIYA
                 </h1>
                 <p className="text-xs text-muted-foreground hidden sm:block">
-                  Your AI Health Companion
+                  Your AI Partner In Care
                 </p>
               </div>
             </div>
@@ -269,7 +269,13 @@ export default function App() {
           </TabsContent>
 
           <TabsContent value="chat" className="mt-0">
-            <ChatInterface healthData={healthData} resetScroll={activeTab === 'chat'} />
+            <ChatInterface 
+              healthData={healthData} 
+              forecasts={forecasts}
+              resetScroll={activeTab === 'chat'} 
+              currentPage={activeTab as 'dashboard' | 'morning' | 'evening' | 'plan' | 'chat' | 'digest' | 'goals'}
+              onNavigate={handleTabChange}
+            />
           </TabsContent>
 
           <TabsContent value="digest" className="mt-0">
@@ -379,7 +385,12 @@ export default function App() {
       </nav>
 
       {/* Floating AI Chat */}
-      <FloatingChat healthData={healthData} />
+      <FloatingChat 
+        healthData={healthData} 
+        forecasts={forecasts}
+        currentPage={activeTab as 'dashboard' | 'morning' | 'evening' | 'plan' | 'chat' | 'digest' | 'goals'}
+        onNavigateToFullChat={() => handleTabChange('chat')}
+      />
     </div>
   );
 }

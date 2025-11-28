@@ -1,15 +1,23 @@
 import { useState } from 'react';
-import { MessageCircle, X, Minimize2 } from 'lucide-react';
+import { MessageCircle, X, Minimize2, Maximize2 } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { ChatInterface } from './ChatInterface';
-import { HealthMetric } from '../types/health';
+import { HealthMetric, DailyForecast } from '../types/health';
 
 interface FloatingChatProps {
   healthData: HealthMetric[];
+  forecasts?: DailyForecast[];
+  currentPage?: 'dashboard' | 'morning' | 'evening' | 'plan' | 'chat' | 'digest' | 'goals';
+  onNavigateToFullChat?: () => void;
 }
 
-export function FloatingChat({ healthData }: FloatingChatProps) {
+export function FloatingChat({ 
+  healthData, 
+  forecasts = [],
+  currentPage = 'dashboard',
+  onNavigateToFullChat
+}: FloatingChatProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -62,7 +70,13 @@ export function FloatingChat({ healthData }: FloatingChatProps) {
 
             {/* Chat Content */}
             <div className="flex-1 overflow-hidden p-4 bg-gradient-to-b from-green-50/30 to-transparent">
-              <ChatInterface healthData={healthData} compact={true} />
+              <ChatInterface 
+                healthData={healthData} 
+                forecasts={forecasts}
+                compact={true}
+                currentPage={currentPage}
+                onNavigate={onNavigateToFullChat}
+              />
             </div>
           </Card>
         </div>

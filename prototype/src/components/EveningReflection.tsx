@@ -148,7 +148,7 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
     },
     {
       id: 'D',
-      title: 'Scenario D — Weekend + Lots of Errands',
+      title: 'Scenario D—Weekend + Lots of Errands',
       contextSections: [
         { label: 'Comfort Zone', content: 'Set at 7,500–8,500 steps' },
         { label: 'Actual Result', content: '5,120 steps achieved' },
