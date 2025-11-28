@@ -51,6 +51,15 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [morningScenario, setMorningScenario] = useState<string | undefined>(undefined);
 
+  // Scroll to top when changing tabs
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Small delay to ensure tab content is rendered before scrolling
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
+  };
+
   useEffect(() => {
     // Initialize with mock data
     const mockData = generateMockHealthData();
@@ -156,7 +165,7 @@ export default function App() {
       {/* Desktop Tabs Navigation */}
       <div className="hidden md:block border-b border-border bg-card/50 backdrop-blur sticky top-16 z-40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="w-full justify-start bg-transparent h-12 p-0 gap-1">
               <TabsTrigger
                 value="dashboard"
@@ -221,13 +230,13 @@ export default function App() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-6 md:py-8 pb-24 md:pb-32">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsContent value="dashboard" className="mt-0">
             <Dashboard
               todayData={todayData}
               weekData={weekData}
               goals={goals}
-              onNavigate={setActiveTab}
+              onNavigate={handleTabChange}
             />
           </TabsContent>
 
@@ -235,7 +244,7 @@ export default function App() {
             <MorningForecast
               forecasts={forecasts}
               onSaveForecast={handleSaveForecast}
-              onLockIn={() => setActiveTab("dashboard")}
+              onLockIn={() => handleTabChange("evening")}
               goals={goals}
               weekData={weekData}
               scenario={morningScenario}
@@ -255,11 +264,12 @@ export default function App() {
             <PlanTomorrow
               forecasts={forecasts}
               morningScenario={morningScenario}
+              onNavigateToChat={() => handleTabChange("chat")}
             />
           </TabsContent>
 
           <TabsContent value="chat" className="mt-0">
-            <ChatInterface healthData={healthData} />
+            <ChatInterface healthData={healthData} resetScroll={activeTab === 'chat'} />
           </TabsContent>
 
           <TabsContent value="digest" className="mt-0">
@@ -283,7 +293,7 @@ export default function App() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 shadow-lg">
         <div className="grid grid-cols-3 h-16">
           <button
-            onClick={() => setActiveTab("dashboard")}
+            onClick={() => handleTabChange("dashboard")}
             className={`flex flex-col items-center justify-center gap-1 transition-colors ${
               activeTab === "dashboard"
                 ? "text-primary"
@@ -294,7 +304,7 @@ export default function App() {
             <span className="text-xs">Home</span>
           </button>
           <button
-            onClick={() => setActiveTab("morning")}
+            onClick={() => handleTabChange("morning")}
             className={`flex flex-col items-center justify-center gap-1 transition-colors ${
               activeTab === "morning"
                 ? "text-primary"
@@ -305,7 +315,7 @@ export default function App() {
             <span className="text-xs">Morning</span>
           </button>
           <button
-            onClick={() => setActiveTab("evening")}
+            onClick={() => handleTabChange("evening")}
             className={`flex flex-col items-center justify-center gap-1 transition-colors ${
               activeTab === "evening"
                 ? "text-primary"
@@ -321,7 +331,7 @@ export default function App() {
         <div className="border-t border-border bg-muted/30 px-4 py-2">
           <div className="flex items-center justify-center gap-6">
             <button
-              onClick={() => setActiveTab("plan")}
+              onClick={() => handleTabChange("plan")}
               className={`flex items-center gap-2 text-sm transition-colors ${
                 activeTab === "plan"
                   ? "text-primary"
@@ -332,7 +342,7 @@ export default function App() {
               <span>Plan</span>
             </button>
             <button
-              onClick={() => setActiveTab("digest")}
+              onClick={() => handleTabChange("digest")}
               className={`flex items-center gap-2 text-sm transition-colors ${
                 activeTab === "digest"
                   ? "text-primary"
@@ -343,7 +353,7 @@ export default function App() {
               <span>Digest</span>
             </button>
             <button
-              onClick={() => setActiveTab("goals")}
+              onClick={() => handleTabChange("goals")}
               className={`flex items-center gap-2 text-sm transition-colors ${
                 activeTab === "goals"
                   ? "text-primary"
@@ -354,7 +364,7 @@ export default function App() {
               <span>Goals</span>
             </button>
             <button
-              onClick={() => setActiveTab("scenarios")}
+              onClick={() => handleTabChange("scenarios")}
               className={`flex items-center gap-2 text-sm transition-colors ${
                 activeTab === "scenarios"
                   ? "text-primary"

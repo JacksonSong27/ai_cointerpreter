@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Slider } from './ui/slider';
 import { Progress } from './ui/progress';
-import { Sunrise, TrendingUp, Calendar, Cloud, Heart, Plus, Lock, Lightbulb, Target, Award, CheckCircle2 } from 'lucide-react';
+import { Sunrise, TrendingUp, Calendar, Cloud, Heart, Plus, Lock, Lightbulb, Target, Award, CheckCircle2, Activity, X, Moon, CalendarDays, CloudRain } from 'lucide-react';
 import { DailyForecast, ContextTag, WhatIfScenario, Goal, HealthMetric } from '../types/health';
 import { generateContextTags, generateMorningScenarios } from '../lib/mockData';
 
@@ -25,6 +25,8 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
   const [locked, setLocked] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const [selectedContext, setSelectedContext] = useState<string | null>(null);
+  const [selectedSignals, setSelectedSignals] = useState<string[]>([]);
+  const [customSignal, setCustomSignal] = useState('');
   
   const baselineProbability = 30;
   const scenarios = generateMorningScenarios(baselineProbability);
@@ -34,7 +36,11 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
     {
       id: 'A',
       title: 'Scenario A—Weather + Long Meeting',
-      context: 'Rainy, 3-hour workshop (2–5 PM), Sleep: 6.1 hours (below baseline).',
+      contextSections: [
+        { label: 'Sleep', content: 'Alex only slept 6.1 hours (significantly less than the 7.5-hour baseline)' },
+        { label: 'Calendar', content: 'Long 3-hour workshop scheduled' },
+        { label: 'Weather', content: 'Rain is expected this afternoon' }
+      ],
       aiResponse: 'Good morning! I pulled in your context for today... Based on patterns like these, I\'m forecasting ~6,500 steps today. Let\'s set today\'s Comfort Zone together—what range feels realistic?',
       predictedSteps: 6500,
       predictedSleep: 6.5
@@ -42,7 +48,11 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
     {
       id: 'B',
       title: 'Scenario B—Sunny Day + Open Afternoon',
-      context: 'Sunny, Only a 30-min stand-up, Sleep: 7.8 hours (above baseline).',
+      contextSections: [
+        { label: 'Sleep', content: 'Alex slept well at 7.8 hours' },
+        { label: 'Calendar', content: 'Calendar is light—only one 30-minute meeting' },
+        { label: 'Weather', content: 'Weather is sunny' }
+      ],
       aiResponse: 'Good morning! Today looks pretty open... Given this, I\'m forecasting ~8,900 steps. Where would you like your Comfort Zone to be today?',
       predictedSteps: 8900,
       predictedSleep: 7.5
@@ -50,7 +60,11 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
     {
       id: 'C',
       title: 'Scenario C—Heavy Stress + Poor Sleep',
-      context: 'Sleep: 4.9 hours, Difficult morning presentation, Mood: Marked "Stressed."',
+      contextSections: [
+        { label: 'Sleep', content: 'Alex had a rough night (4.94 hours of sleep)' },
+        { label: 'Mood', content: 'Tagged mood as "Stressed"' },
+        { label: 'Calendar', content: 'Difficult morning presentation is on the schedule' }
+      ],
       aiResponse: 'Good morning. I see you slept less than usual and have an important morning presentation... I\'m forecasting ~4,700 steps. Let\'s set a gentle Comfort Zone for today.',
       predictedSteps: 4700,
       predictedSleep: 7.0
@@ -58,12 +72,45 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
     {
       id: 'D',
       title: 'Scenario D — Weekend + Lots of Errands',
-      context: 'Saturday, Mild weather, Calendar: Grocery trip + walking dog + park outing, Sleep: 8.3 hours.',
+      contextSections: [
+        { label: 'Day Type', content: 'It\'s Saturday' },
+        { label: 'Sleep', content: 'Alex slept 8.3 hours' },
+        { label: 'Plans', content: 'Grocery trip and park outing planned (common high-activity weekend items)' }
+      ],
       aiResponse: 'Happy Saturday! It looks like a more active day... Based on your past weekends, I forecast ~10,500 steps. Where would you like your Comfort Zone today?',
       predictedSteps: 10500,
       predictedSleep: 8.0
     }
   ];
+
+  // Signal prompts for "Signals you're noticing today"
+  const signalPrompts = [
+    'Slept well',
+    'Feeling tired',
+    'Stressed',
+    'Energized',
+    'Busy schedule',
+    'Light day ahead',
+    'Weather looks good',
+    'Not feeling well',
+    'Motivated',
+    'Low energy'
+  ];
+
+  const handleSignalToggle = (signal: string) => {
+    setSelectedSignals(prev =>
+      prev.includes(signal)
+        ? prev.filter(s => s !== signal)
+        : [...prev, signal]
+    );
+  };
+
+  const handleAddCustomSignal = () => {
+    if (customSignal.trim() && !selectedSignals.includes(customSignal.trim())) {
+      setSelectedSignals(prev => [...prev, customSignal.trim()]);
+      setCustomSignal('');
+    }
+  };
 
   const handleContextSelect = (scenarioId: string) => {
     setSelectedContext(scenarioId);
@@ -94,6 +141,9 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
       onSaveForecast(metric, midpoint);
     });
     setLocked(true);
+    
+    // Scroll to top of the page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // Navigate to dashboard after a brief moment
     setTimeout(() => {
@@ -191,8 +241,7 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
-                  <h4 className="text-sm mb-1">{scenario.title}</h4>
-                  <p className="text-xs text-muted-foreground">{scenario.context}</p>
+                  <h4 className="text-sm">{scenario.title}</h4>
                 </div>
                 {selectedContext === scenario.id && (
                   <div className="w-2 h-2 bg-orange-600 rounded-full animate-pulse shrink-0 mt-1"></div>
@@ -209,20 +258,50 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
         )}
       </div>
 
-      {/* Kriya Says Section - Only show when scenario selected */}
+      {/* Selected Context Details - Show before Kriya Says */}
       {selectedContext && (() => {
         const scenario = contextScenarios.find(s => s.id === selectedContext);
         return scenario ? (
-          <Card className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-emerald-300 dark:border-emerald-700">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-md">
-                <Heart className="w-5 h-5" />
+          <div className="space-y-3">
+            <h4 className="text-sm text-gray-700 dark:text-gray-300">Here's the context:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {scenario.contextSections.map((section, index) => (
+                <Card key={index} className="p-4 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      {section.label === 'Sleep' && <Moon className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      {section.label === 'Calendar' && <CalendarDays className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      {section.label === 'Weather' && <CloudRain className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      {section.label === 'Mood' && <Heart className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      {section.label === 'Day Type' && <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      {section.label === 'Plans' && <Target className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      <h5 className="text-xs text-blue-900 dark:text-blue-100">{section.label}</h5>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      {section.content}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : null;
+      })()}
+
+      {/* Kriya Says Section - Only show when scenario selected - HIGHLIGHTED */}
+      {selectedContext && (() => {
+        const scenario = contextScenarios.find(s => s.id === selectedContext);
+        return scenario ? (
+          <Card className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-400 dark:border-emerald-600 shadow-lg ring-4 ring-emerald-100 dark:ring-emerald-900/50">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg">
+                <Heart className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h4 className="text-sm">Kriya Says:</h4>
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-base text-emerald-900 dark:text-emerald-100">Kriya Says:</h4>
                 </div>
-                <p className="text-sm text-gray-800 dark:text-gray-200">
+                <p className="text-base text-gray-800 dark:text-gray-200 leading-relaxed">
                   {scenario.aiResponse}
                 </p>
               </div>
@@ -230,6 +309,73 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
           </Card>
         ) : null;
       })()}
+
+      {/* Signals You're Noticing Today - Only show when scenario selected */}
+      {selectedContext && (
+        <Card className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 border-amber-300 dark:border-amber-700">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-amber-600" />
+              <h4 className="text-sm">Signals you're noticing today</h4>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {signalPrompts.map((signal) => (
+                <Badge
+                  key={signal}
+                  variant={selectedSignals.includes(signal) ? "default" : "outline"}
+                  className={`cursor-pointer transition-all ${
+                    selectedSignals.includes(signal)
+                      ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                      : 'hover:bg-amber-100 dark:hover:bg-amber-900'
+                  }`}
+                  onClick={() => handleSignalToggle(signal)}
+                >
+                  {signal}
+                </Badge>
+              ))}
+              
+              {/* Display custom signals */}
+              {selectedSignals
+                .filter(signal => !signalPrompts.includes(signal))
+                .map((signal) => (
+                  <Badge
+                    key={signal}
+                    variant="default"
+                    className="bg-amber-600 hover:bg-amber-700 text-white cursor-pointer"
+                    onClick={() => handleSignalToggle(signal)}
+                  >
+                    {signal}
+                    <X className="w-3 h-3 ml-1" />
+                  </Badge>
+                ))}
+            </div>
+
+            {/* Add custom signal input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Add your own signal..."
+                value={customSignal}
+                onChange={(e) => setCustomSignal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAddCustomSignal();
+                  }
+                }}
+                className="flex-1 px-3 py-2 text-sm border border-amber-300 dark:border-amber-700 rounded-md bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <Button
+                onClick={handleAddCustomSignal}
+                size="sm"
+                className="bg-amber-600 hover:bg-amber-700"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Only show the rest if a scenario is selected */}
       {selectedContext && (
@@ -342,7 +488,7 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
                 </div>
 
                 <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
-                  <p className="text-muted-foreground mb-2">AI Baseline Prediction</p>
+                  <p className="text-muted-foreground mb-2">Kriya Baseline Prediction</p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl">
                       {selectedContext 
@@ -357,9 +503,79 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
                 </div>
 
                 <div className="space-y-4">
+                  {/* Quick Select Options */}
+                  <div className="space-y-2">
+                    <span className="text-sm">Quick Select Your Comfort Zone:</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <Card 
+                        className={`p-4 cursor-pointer transition-all border-2 ${
+                          comfortZones.steps[0] === Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 0.7) && 
+                          comfortZones.steps[1] === Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 0.9)
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                            : 'border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-700'
+                        }`}
+                        onClick={() => {
+                          const predicted = contextScenarios.find(s => s.id === selectedContext)!.predictedSteps;
+                          handleComfortZoneChange('steps', [Math.floor(predicted * 0.7), Math.floor(predicted * 0.9)]);
+                        }}
+                      >
+                        <div className="text-center space-y-1">
+                          <h5 className="text-sm">Gentle</h5>
+                          <p className="text-xs text-muted-foreground">
+                            {Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 0.7).toLocaleString()} - {Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 0.9).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Low pressure day</p>
+                        </div>
+                      </Card>
+                      
+                      <Card 
+                        className={`p-4 cursor-pointer transition-all border-2 ${
+                          comfortZones.steps[0] === Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 0.85) && 
+                          comfortZones.steps[1] === Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 1.15)
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                            : 'border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-700'
+                        }`}
+                        onClick={() => {
+                          const predicted = contextScenarios.find(s => s.id === selectedContext)!.predictedSteps;
+                          handleComfortZoneChange('steps', [Math.floor(predicted * 0.85), Math.floor(predicted * 1.15)]);
+                        }}
+                      >
+                        <div className="text-center space-y-1">
+                          <h5 className="text-sm">Moderate</h5>
+                          <p className="text-xs text-muted-foreground">
+                            {Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 0.85).toLocaleString()} - {Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 1.15).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Balanced approach</p>
+                        </div>
+                      </Card>
+                      
+                      <Card 
+                        className={`p-4 cursor-pointer transition-all border-2 ${
+                          comfortZones.steps[0] === Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 1.0) && 
+                          comfortZones.steps[1] === Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 1.3)
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                            : 'border-gray-200 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-700'
+                        }`}
+                        onClick={() => {
+                          const predicted = contextScenarios.find(s => s.id === selectedContext)!.predictedSteps;
+                          handleComfortZoneChange('steps', [Math.floor(predicted * 1.0), Math.floor(predicted * 1.3)]);
+                        }}
+                      >
+                        <div className="text-center space-y-1">
+                          <h5 className="text-sm">Ambitious</h5>
+                          <p className="text-xs text-muted-foreground">
+                            {Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 1.0).toLocaleString()} - {Math.floor(contextScenarios.find(s => s.id === selectedContext)!.predictedSteps * 1.3).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Stretch goal</p>
+                        </div>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Custom Slider */}
                   <div>
                     <div className="flex justify-between mb-3">
-                      <span>Your Comfort Zone</span>
+                      <span className="text-sm">Or customize your range:</span>
                       <span className="text-blue-600 dark:text-blue-400">
                         {comfortZones.steps[0].toLocaleString()} - {comfortZones.steps[1].toLocaleString()} steps
                       </span>
@@ -402,7 +618,7 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
                 </div>
 
                 <div className="bg-purple-50 dark:bg-purple-950 p-4 rounded-lg">
-                  <p className="text-muted-foreground mb-2">AI Baseline Prediction</p>
+                  <p className="text-muted-foreground mb-2">Kriya Baseline Prediction</p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl">{sleepForecast.predicted.toFixed(1)}</span>
                     <span className="text-muted-foreground">hours</span>
@@ -413,9 +629,61 @@ export function MorningForecast({ forecasts, onSaveForecast, onLockIn, goals, we
                 </div>
 
                 <div className="space-y-4">
+                  {/* Quick Select Options for Sleep */}
+                  <div className="space-y-2">
+                    <span className="text-sm">Quick Select Your Comfort Zone:</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <Card 
+                        className={`p-4 cursor-pointer transition-all border-2 ${
+                          comfortZones.sleep[0] === 6.0 && comfortZones.sleep[1] === 7.0
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-950' 
+                            : 'border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700'
+                        }`}
+                        onClick={() => handleComfortZoneChange('sleep', [6.0, 7.0])}
+                      >
+                        <div className="text-center space-y-1">
+                          <h5 className="text-sm">Gentle</h5>
+                          <p className="text-xs text-muted-foreground">6.0 - 7.0 hours</p>
+                          <p className="text-xs text-muted-foreground">Rest when you can</p>
+                        </div>
+                      </Card>
+                      
+                      <Card 
+                        className={`p-4 cursor-pointer transition-all border-2 ${
+                          comfortZones.sleep[0] === 7.0 && comfortZones.sleep[1] === 8.0
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-950' 
+                            : 'border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700'
+                        }`}
+                        onClick={() => handleComfortZoneChange('sleep', [7.0, 8.0])}
+                      >
+                        <div className="text-center space-y-1">
+                          <h5 className="text-sm">Moderate</h5>
+                          <p className="text-xs text-muted-foreground">7.0 - 8.0 hours</p>
+                          <p className="text-xs text-muted-foreground">Healthy baseline</p>
+                        </div>
+                      </Card>
+                      
+                      <Card 
+                        className={`p-4 cursor-pointer transition-all border-2 ${
+                          comfortZones.sleep[0] === 8.0 && comfortZones.sleep[1] === 9.0
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-950' 
+                            : 'border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700'
+                        }`}
+                        onClick={() => handleComfortZoneChange('sleep', [8.0, 9.0])}
+                      >
+                        <div className="text-center space-y-1">
+                          <h5 className="text-sm">Ambitious</h5>
+                          <p className="text-xs text-muted-foreground">8.0 - 9.0 hours</p>
+                          <p className="text-xs text-muted-foreground">Prioritizing rest</p>
+                        </div>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Custom Slider */}
                   <div>
                     <div className="flex justify-between mb-3">
-                      <span>Your Comfort Zone</span>
+                      <span className="text-sm">Or customize your range:</span>
                       <span className="text-purple-600 dark:text-purple-400">
                         {comfortZones.sleep[0].toFixed(1)} - {comfortZones.sleep[1].toFixed(1)} hours
                       </span>

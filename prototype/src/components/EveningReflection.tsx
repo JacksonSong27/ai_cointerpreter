@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
 import { Checkbox } from './ui/checkbox';
-import { Sunset, TrendingUp, TrendingDown, Sparkles, Search, Lightbulb, Target, Heart, Lock, Sunrise, Calendar } from 'lucide-react';
+import { Sunset, TrendingUp, TrendingDown, Sparkles, Search, Lightbulb, Target, Heart, Lock, Sunrise, Calendar, CheckCircle2, Zap } from 'lucide-react';
 import { DailyForecast, AttributionCause, WhatIfScenario } from '../types/health';
 import { calculateCalibrationScore, calculateSurpriseIndex, generateWhatIfScenarios, generateEveningScenarios } from '../lib/mockData';
 
@@ -30,6 +30,7 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
   const [customCause, setCustomCause] = useState('');
   const [gracePointUsed, setGracePointUsed] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<WhatIfScenario | null>(null);
+  const [selectedEveningContext, setSelectedEveningContext] = useState<string | null>(null);
 
   const moods = ['🌟 Great', '😊 Good', '😐 Okay', '😔 Tough', '💪 Resilient'];
 
@@ -59,7 +60,18 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
   const handleSubmitReflection = () => {
     // Just save the reflection, don't navigate
     onSaveReflection(reflectionNotes, selectedMood);
+    // Scroll to top of the page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setStage('complete');
+  };
+
+  const handleLockInScenario = () => {
+    // Lock in the selected scenario and complete the what-if stage
+    if (selectedScenario) {
+      // Scroll to top of the page
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setStage('complete');
+    }
   };
 
   // Calculate metrics for primary forecast (steps)
@@ -79,46 +91,86 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
   const eveningScenarios = [
     {
       id: 'A',
-      title: 'Scenario A—Underperforming + Rain + Late Meeting',
-      context: 'Comfort Zone: 5,800–7,200. Actual: 4,510.',
+      title: 'Scenario A—Underperforming + Rain',
+      contextSections: [
+        { label: 'Comfort Zone', content: 'Set at 5,800–7,200 steps' },
+        { label: 'Actual Result', content: '4,510 steps achieved' },
+        { label: 'Surprise', content: 'High Surprise (+75)' }
+      ],
       aiResponse: 'That\'s a High Surprise (+75). Let\'s explore what might have caused today\'s dip: Your workshop ran 90 minutes late; Heavy rain started at 3 PM... Which of these do you think played the biggest role?',
       comfortZone: [5800, 7200],
       actual: 4510,
-      surpriseLevel: 75
+      surpriseLevel: 75,
+      surpriseBreakdown: [
+        { factor: 'Workshop ran 90 minutes late', percentage: 35 },
+        { factor: 'Heavy rain from 3 PM onwards', percentage: 30 },
+        { factor: 'Missed morning walk routine', percentage: 20 },
+        { factor: 'Back-to-back meetings', percentage: 15 }
+      ]
     },
     {
       id: 'B',
-      title: 'Scenario B—Overperforming + Sunshine + Errands',
-      context: 'Comfort Zone: 7,000–8,500. Actual: 11,230.',
+      title: 'Scenario B—Overperforming + Sunshine',
+      contextSections: [
+        { label: 'Comfort Zone', content: 'Set at 7,000–8,500 steps' },
+        { label: 'Actual Result', content: '11,230 steps achieved' },
+        { label: 'Surprise', content: 'Positive Surprise (+65)' }
+      ],
       aiResponse: 'That\'s a Positive Surprise! (+65) Your movement was higher than expected. Possible reasons: You walked to multiple errands; Sunny weather encouraged extra activity... Which factor feels most true for your day?',
       comfortZone: [7000, 8500],
       actual: 11230,
-      surpriseLevel: 65
+      surpriseLevel: 65,
+      surpriseBreakdown: [
+        { factor: 'Walked to multiple errands', percentage: 40 },
+        { factor: 'Sunny weather (75°F)', percentage: 25 },
+        { factor: 'Parked farther from office', percentage: 20 },
+        { factor: 'Lunch walk with colleague', percentage: 15 }
+      ]
     },
     {
       id: 'C',
-      title: 'Scenario C—Flat Activity + Stress + No Outdoor Time',
-      context: 'Comfort Zone: 6,000–7,000. Actual: 3,220.',
+      title: 'Scenario C—Flat Activity + Stress',
+      contextSections: [
+        { label: 'Comfort Zone', content: 'Set at 6,000–7,000 steps' },
+        { label: 'Actual Result', content: '3,220 steps achieved' },
+        { label: 'Surprise', content: 'Moderate Surprise (+40)' }
+      ],
       aiResponse: 'That\'s a Moderate Surprise (+40). Possible causes: You tagged \'Stress\' in the afternoon; Calendar shows 5 straight hours of desk work... What feels like the X-Factor today?',
       comfortZone: [6000, 7000],
       actual: 3220,
-      surpriseLevel: 40
+      surpriseLevel: 40,
+      surpriseBreakdown: [
+        { factor: 'Tagged "Stress" in afternoon', percentage: 30 },
+        { factor: '5 hours straight desk work', percentage: 35 },
+        { factor: 'Skipped usual coffee walk', percentage: 20 },
+        { factor: 'Low energy levels', percentage: 15 }
+      ]
     },
     {
       id: 'D',
-      title: 'Scenario D—Great Sleep but Low Steps',
-      context: 'Comfort Zone: 7,500–8,500. Actual: 5,120.',
+      title: 'Scenario D — Weekend + Lots of Errands',
+      contextSections: [
+        { label: 'Comfort Zone', content: 'Set at 7,500–8,500 steps' },
+        { label: 'Actual Result', content: '5,120 steps achieved' },
+        { label: 'Surprise', content: 'Curious Surprise (+55)' }
+      ],
       aiResponse: 'Interesting—this is a Curious Surprise (+55). Even though you slept well, your activity was lower... Patterns like these often happen when: You work from home all day; You take long calls without moving... Which resonates most with your experience today?',
       comfortZone: [7500, 8500],
       actual: 5120,
-      surpriseLevel: 55
+      surpriseLevel: 55,
+      surpriseBreakdown: [
+        { factor: 'Worked from home all day', percentage: 35 },
+        { factor: 'Long phone calls (no movement)', percentage: 30 },
+        { factor: 'Rainy weekend weather', percentage: 20 },
+        { factor: 'Stayed in pajamas longer', percentage: 15 }
+      ]
     }
   ];
 
-  // Get the evening scenario that matches the morning scenario
-  const matchedEveningScenario = morningScenario 
-    ? eveningScenarios.find(s => s.id === morningScenario)
-    : eveningScenarios[0]; // Default to Scenario A if no morning scenario selected
+  // Get the evening scenario that matches the selected context
+  const matchedEveningScenario = selectedEveningContext 
+    ? eveningScenarios.find(s => s.id === selectedEveningContext)
+    : null; // No default - user must select a scenario
 
   // Act II: Outcome Reveal & Detective Mode
   if (stage === 'reveal' || stage === 'detective') {
@@ -137,11 +189,145 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
           </div>
         </div>
 
-        {/* Outcome Reveal */}
+        {/* Evening Context Scenario Selection - Only show in reveal stage */}
         {stage === 'reveal' && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <h3>Today's Outcome - Select Your Scenario</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {eveningScenarios.map((scenario) => (
+                <Card
+                  key={scenario.id}
+                  className={`p-4 cursor-pointer transition-all ${
+                    selectedEveningContext === scenario.id
+                      ? 'border-2 border-indigo-500 bg-indigo-50 dark:bg-indigo-950/50 shadow-md'
+                      : 'border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800'
+                  }`}
+                  onClick={() => setSelectedEveningContext(scenario.id)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <h4 className="text-sm mb-1">{scenario.title}</h4>
+                      <div className="mt-2 flex items-center gap-2">
+                        <Badge 
+                          className={`text-xs ${
+                            scenario.surpriseLevel >= 70 
+                              ? 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-100'
+                              : scenario.surpriseLevel >= 50 
+                              ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'
+                              : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100'
+                          }`}
+                        >
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Surprise: +{scenario.surpriseLevel}
+                        </Badge>
+                      </div>
+                    </div>
+                    {selectedEveningContext === scenario.id && (
+                      <div className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse shrink-0 mt-1"></div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {!selectedEveningContext && (
+              <p className="text-sm text-muted-foreground italic text-center">
+                👆 Select a scenario to see today's debrief
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Selected Context Details - Only show in reveal stage */}
+        {stage === 'reveal' && selectedEveningContext && matchedEveningScenario && (
+          <div className="space-y-3">
+            <h4 className="text-sm text-gray-700 dark:text-gray-300">Here's the context:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {matchedEveningScenario.contextSections.map((section, index) => (
+                <Card key={index} className="p-4 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      {section.label === 'Comfort Zone' && <Target className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      {section.label === 'Actual Result' && <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      {section.label === 'Surprise' && <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                      <h5 className="text-xs text-blue-900 dark:text-blue-100">{section.label}</h5>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      {section.content}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Kriya Says Section - Only show in reveal stage */}
+        {stage === 'reveal' && selectedEveningContext && matchedEveningScenario && (
+          <Card className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-400 dark:border-emerald-600 shadow-lg ring-4 ring-emerald-100 dark:ring-emerald-900/50">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg">
+                <Heart className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-base text-emerald-900 dark:text-emerald-100">Kriya Says:</h4>
+                </div>
+                <p className="text-base text-gray-800 dark:text-gray-200 leading-relaxed">
+                  {matchedEveningScenario.aiResponse}
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Surprise Breakdown Section - Only show in reveal stage */}
+        {stage === 'reveal' && selectedEveningContext && matchedEveningScenario && matchedEveningScenario.surpriseBreakdown && (
+          <Card className="p-6 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950 border-2 border-violet-300 dark:border-violet-700">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                <h3>Surprise Breakdown</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Based on your activity patterns, here's what likely contributed to today's outcome:
+              </p>
+              
+              <div className="space-y-3">
+                {matchedEveningScenario.surpriseBreakdown.map((item, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">{item.factor}</span>
+                      <span className="text-sm px-2 py-1 bg-violet-600 text-white rounded-full">
+                        {item.percentage}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all duration-500"
+                        style={{ width: `${item.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <p className="text-xs text-muted-foreground italic text-center pt-2">
+                💡 These factors are estimated based on your historical patterns and today's context
+              </p>
+            </div>
+          </Card>
+        )}
+
+        {/* Outcome Reveal */}
+        {stage === 'reveal' && selectedEveningContext && (
           <>
             {/* Morning Prediction Recap */}
-            <Card className="p-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
+            <Card className="p-6 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950 dark:to-yellow-950 border-amber-200 dark:border-amber-800">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Sunrise className="w-5 h-5 text-amber-600" />
@@ -218,40 +404,6 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
                 </div>
               </div>
             </Card>
-
-            {/* Evening Scenario Display */}
-            {matchedEveningScenario && (
-              <Card className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 border-indigo-200 dark:border-indigo-800">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                    <h4>{matchedEveningScenario.title}</h4>
-                  </div>
-                  
-                  {/* Context Display */}
-                  <div className="bg-white dark:bg-gray-900 p-4 rounded-lg">
-                    <p className="text-sm">
-                      <strong>Context:</strong> {matchedEveningScenario.context}
-                    </p>
-                  </div>
-                  
-                  {/* AI Response Box */}
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-2 border-green-200 dark:border-green-800 p-4 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-emerald-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-md">
-                        <Heart className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="text-sm mb-2">Kriya Says:</h5>
-                        <p className="text-sm leading-relaxed">
-                          {matchedEveningScenario.aiResponse}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            )}
 
             <Button 
               onClick={() => {
