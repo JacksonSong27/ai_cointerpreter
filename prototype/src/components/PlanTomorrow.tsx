@@ -35,121 +35,127 @@ export function PlanTomorrow({ forecasts, morningScenario, onNavigateToChat }: P
   const planScenarios: PlanScenario[] = [
     {
       id: 'A',
-      title: 'Scenario A—Evening Fatigue',
+      title: 'Scenario A—Weather + Long Meeting',
       contextSections: [
-        { label: 'Current Status', content: 'Recent low energy affecting activity' },
+        { label: 'Current Status', content: 'Low sleep (6.1 hours) + rainy weather expected' },
         { label: 'Baseline Chance', content: '30% probability of hitting goal' },
-        { label: 'Key Factor', content: 'Low energy patterns' }
+        { label: 'Key Factor', content: 'Weather and meeting constraints' }
       ],
       baselineProbability: 30,
       options: [
         { 
           id: 'A1', 
-          action: '15-min lunch walk (~2,000 steps)', 
-          newProbability: 65,
-          kriyaResponse: 'A lunch walk is perfect for breaking up your day! It gets you moving when energy is naturally higher, plus the mental break can boost productivity. Even 15 minutes can add significant steps without feeling like a dedicated workout.'
+          action: 'Take stairs during workshop break (~600 steps)', 
+          newProbability: 55,
+          kriyaResponse: 'Using workshop breaks for movement is smart! Even a few flights of stairs can add meaningful steps without disrupting your schedule. It\'s about finding opportunities within your constraints.'
         },
         { 
           id: 'A2', 
-          action: '20-min home stretch', 
-          newProbability: 85,
-          kriyaResponse: 'Stretching is wonderful self-care! It releases tension, improves circulation, and can help you feel more energized. The best part? You can do it at home in comfortable clothes, making it a low-barrier option when energy is limited.'
+          action: 'Indoor walking during rain (~1,500 steps)', 
+          newProbability: 65,
+          kriyaResponse: 'When weather limits outdoor options, indoor movement is perfect! You can walk hallways, use stairs, or even pace during phone calls. Rain doesn\'t have to stop your movement.'
         },
         { 
           id: 'A3', 
-          action: 'Sleep +1 hour (better energy tomorrow)', 
+          action: 'Sleep +1 hour tonight (better energy tomorrow)', 
           newProbability: 78,
-          kriyaResponse: 'Prioritizing sleep is one of the most compassionate choices you can make! Extra rest helps your body recover and sets you up for better energy tomorrow. Remember, taking care of your sleep is taking care of your health goals.'
+          kriyaResponse: 'After a short night, prioritizing sleep is wise! Better rest tonight sets you up for more natural movement tomorrow. Sleep is foundational to your health goals.'
         },
       ],
-      kriyaSays: 'Which of these feels doable for tomorrow?'
+      kriyaSays: 'Which of these works with your schedule and the weather?'
     },
     {
       id: 'B',
-      title: 'Scenario B—Busy Day Tomorrow',
+      title: 'Scenario B—Sunny Day + Open Afternoon',
       contextSections: [
-        { label: 'Current Status', content: 'Very busy day scheduled' },
-        { label: 'Baseline Chance', content: '42% probability of hitting goal' },
-        { label: 'Key Factor', content: 'Packed calendar tomorrow' }
+        { label: 'Current Status', content: 'Good sleep (7.8 hours) + sunny weather + light calendar' },
+        { label: 'Baseline Chance', content: '65% probability of hitting goal' },
+        { label: 'Key Factor', content: 'Favorable conditions for activity' }
       ],
-      baselineProbability: 42,
+      baselineProbability: 65,
       options: [
         { 
           id: 'B1', 
-          action: 'Move meeting to standing desk', 
-          newProbability: 60,
-          kriyaResponse: 'Standing meetings are a clever way to integrate movement into your busy schedule! You\'re getting work done while being more active. It\'s not about dramatic change—it\'s about finding opportunities within your existing routine.'
+          action: 'Take a 20-min outdoor walk (~2,500 steps)', 
+          newProbability: 85,
+          kriyaResponse: 'A sunny day walk is perfect! The weather is on your side, and with a light calendar, you have the flexibility. This is a great opportunity to enjoy movement naturally.'
         },
         { 
           id: 'B2', 
-          action: 'Take stairs for 2–3 short moments (~400 steps)', 
-          newProbability: 55,
-          kriyaResponse: 'Taking the stairs a few times adds up without requiring a big time commitment! These micro-movements throughout the day are sustainable and don\'t disrupt your packed schedule. Every flight counts!'
+          action: 'Park farther away and walk to errands (~1,800 steps)', 
+          newProbability: 80,
+          kriyaResponse: 'With good weather and an open schedule, walking to errands feels natural! It combines practical tasks with movement, and the sunshine makes it enjoyable.'
         },
         { 
           id: 'B3', 
-          action: 'Add 10-min walk after meeting (~1,300 steps)', 
-          newProbability: 72,
-          kriyaResponse: 'A post-meeting walk is a great transition ritual! It helps you mentally reset while adding meaningful movement. Ten minutes is enough to make a difference without feeling like it\'s eating into your busy day.'
+          action: 'Add a lunchtime stroll (~1,500 steps)', 
+          newProbability: 75,
+          kriyaResponse: 'A lunchtime walk on a sunny day is delightful! It breaks up your day, boosts energy, and takes advantage of the nice weather. Perfect timing with your light calendar!'
         },
       ],
-      kriyaSays: 'I can simulate any option—want to add your own idea too?'
+      kriyaSays: 'With good weather and an open schedule, which feels most appealing?'
     },
     {
       id: 'C',
       title: 'Scenario C—Heavy Stress + Poor Sleep',
       contextSections: [
-        { label: 'Current Status', content: 'Low sleep (4.2 hours)' },
-        { label: 'Baseline Chance', content: '25% probability of hitting goal' },
-        { label: 'Key Factor', content: 'Sleep recovery needed' }
-      ],
-      baselineProbability: 25,
-      options: [
-        { 
-          id: 'C1', 
-          action: 'Sleep +1 hour (better recovery)', 
-          newProbability: 48,
-          kriyaResponse: 'After poor sleep, prioritizing recovery is the wisest choice! Your body needs rest to function well. This isn\'t giving up on your goals—it\'s setting yourself up for sustainable success. Sleep is a health metric too!'
-        },
-        { 
-          id: 'C2', 
-          action: '15-min afternoon walk (~2,000 steps)', 
-          newProbability: 65,
-          kriyaResponse: 'An afternoon walk can actually help when you\'re tired! Gentle movement boosts circulation and can give you a natural energy lift. Just keep it easy—this isn\'t about pushing through exhaustion, it\'s about supporting your body.'
-        },
-      ],
-      kriyaSays: 'Would you like me to prioritize low-effort or high-impact tomorrow plans?'
-    },
-    {
-      id: 'D',
-      title: 'Scenario D — Low Sleep Risk',
-      contextSections: [
-        { label: 'Current Status', content: 'Very poor sleep last night (4.2 hours)' },
+        { label: 'Current Status', content: 'Very low sleep (4.94 hours) + stressed + morning presentation' },
         { label: 'Baseline Chance', content: '25% probability of hitting goal' },
         { label: 'Key Factor', content: 'Critical recovery needed' }
       ],
       baselineProbability: 25,
       options: [
         { 
-          id: 'D1', 
-          action: 'Sleep +1 hour (better recovery)', 
+          id: 'C1', 
+          action: 'Sleep +1.5 hours tonight (critical recovery)', 
           newProbability: 48,
-          kriyaResponse: 'With such low sleep, getting more rest is critical! Your body is telling you it needs recovery. Honoring that need is an act of self-compassion. You\'ll be in a much better place to tackle your goals when you\'re rested.'
+          kriyaResponse: 'After such poor sleep, prioritizing recovery is essential! Your body needs rest to function well, especially with a morning presentation. This isn\'t giving up—it\'s setting yourself up for sustainable success.'
+        },
+        { 
+          id: 'C2', 
+          action: 'Gentle 10-min walk after presentation (~1,200 steps)', 
+          newProbability: 42,
+          kriyaResponse: 'A gentle walk after your presentation can help! It\'s light movement that supports your body without demanding too much when you\'re sleep-deprived. Keep it easy and listen to your energy.'
+        },
+        { 
+          id: 'C3', 
+          action: '5-min morning mobility routine', 
+          newProbability: 35,
+          kriyaResponse: 'A gentle morning routine can help ease your body into the day! Just five minutes of easy movement gets your blood flowing without demanding too much when you\'re low on sleep.'
+        },
+      ],
+      kriyaSays: 'With such low sleep and stress, which feels most supportive?'
+    },
+    {
+      id: 'D',
+      title: 'Scenario D—Weekend + Lots of Errands',
+      contextSections: [
+        { label: 'Current Status', content: 'Weekend with planned errands and activities' },
+        { label: 'Baseline Chance', content: '55% probability of hitting goal' },
+        { label: 'Key Factor', content: 'Weekend activity patterns' }
+      ],
+      baselineProbability: 55,
+      options: [
+        { 
+          id: 'D1', 
+          action: 'Park farther from stores (~800 steps)', 
+          newProbability: 72,
+          kriyaResponse: 'Parking farther away is a simple way to add movement to your errands! It doesn\'t require extra time, just a small shift in routine. These micro-changes add up naturally throughout your day.'
         },
         { 
           id: 'D2', 
-          action: '5-min "wake-up mobility routine"', 
-          newProbability: 39,
-          kriyaResponse: 'A gentle wake-up routine can help ease your body into the day! Five minutes of easy movement gets your blood flowing without demanding too much when you\'re low on sleep. It\'s about working with your body, not against it.'
+          action: 'Take a 20-min park walk (~2,500 steps)', 
+          newProbability: 85,
+          kriyaResponse: 'A park walk is perfect for weekends! It combines movement with relaxation and can be a great way to break up errands. Plus, being outside can boost your mood and energy naturally.'
         },
         { 
           id: 'D3', 
-          action: '15-min afternoon walk (~2,000 steps)', 
-          newProbability: 65,
-          kriyaResponse: 'An afternoon walk can be surprisingly helpful when you\'re sleep-deprived! The fresh air and gentle movement can provide a natural energy boost. Just remember to keep it light—you\'re supporting yourself, not pushing through exhaustion.'
+          action: 'Walk to nearby errands instead of driving', 
+          newProbability: 78,
+          kriyaResponse: 'Walking to errands is a wonderful way to integrate movement into your weekend! It\'s practical, sustainable, and doesn\'t feel like "exercise"—just part of your day. Every trip counts!'
         },
       ],
-      kriyaSays: 'Would you like me to prioritize low-effort or high-impact tomorrow plans?'
+      kriyaSays: 'Which of these feels natural for your weekend?'
     }
   ];
 

@@ -49,7 +49,7 @@ export function ChatInterface({
     {
       id: '1',
       role: 'assistant',
-      content: "Hi! I'm Kriya, your partner in care. I'm here to help you understand *why* your health data fluctuates, not just *what* happened. Ask me anything!",
+      content: "Hi! I'm Kriya, your partner in care. I'm here to help you understand *why* your health data fluctuates, not just *what* happened.\n\nYou might ask me about:\n• Why you missed your step goal today\n• Why you slept poorly last night\n• Why your steps vary so much\n• Whether it's okay to have an off day\n\nAsk me anything!",
       timestamp: new Date(),
       suggestedQuestions: getContextualQuestions(currentPage)
     }
@@ -80,7 +80,7 @@ export function ChatInterface({
     const baseQuestions = [
       "Why do my steps vary so much?",
       "Is it okay that I'm having an off day?",
-      "Why did I feel different from what the data shows?"
+      "Why didn't I meet my step goal today?"
     ];
 
     const pageQuestions: Record<string, string[]> = {
@@ -450,10 +450,6 @@ export function ChatInterface({
       topic = 'missed_goal';
     } else if (lowerQ.includes('vary') || lowerQ.includes('fluctuate') || lowerQ.includes('pattern')) {
       topic = 'steps_vary';
-    } else if (lowerQ.includes('feel') && lowerQ.includes('different')) {
-      topic = 'feel_different';
-    } else if (lowerQ.includes('predict') || lowerQ.includes('forecast') || lowerQ.includes('low step')) {
-      topic = 'prediction';
     } else if (lowerQ.includes('off day') || lowerQ.includes('okay')) {
       topic = 'off_day';
     }
@@ -486,10 +482,10 @@ export function ChatInterface({
               'What caused the biggest impact?',
               'How do I bounce back?',
               'Should I adjust my goals?'
-            ]
+            ],
           },
           {
-            content: `I notice your steps were lower today. Looking at your patterns, days with less sleep (like last night's ${todayData?.sleep.toFixed(1) || '6.5'} hours) often correlate with reduced movement. This isn't a judgment—it's your body being honest about what it needs.`,
+            content: `I notice your steps were lower today. Looking at your patterns, days with less sleep often correlate with reduced movement. This isn't a judgment—it's your body being honest about what it needs.`,
             quickActions: [
               { id: 'ask-sleep', label: 'Tell me about sleep', action: 'suggest' as const, question: 'Why did I sleep so poorly last night?' },
               { id: 'nav-evening', label: 'Evening Reflection', action: 'navigate' as const, target: 'evening' }
@@ -525,55 +521,14 @@ export function ChatInterface({
         ]
       },
       {
-        // Topic 2: Low step prediction - 2 variants
-        keywords: ['predict', 'predicting', 'prediction', 'forecast', 'low steps', 'low step', 'expecting', 'expect', 'today', 'tomorrow'],
-        responses: [
-          {
-            content: `I noticed you had a short sleep and a busy afternoon ahead. Days like this tend to naturally slow movement. That doesn't mean anything is wrong—it just helps me set a gentle expectation so you don't feel pressured.`,
-            quickActions: [
-              { id: 'nav-morning', label: 'Set Comfort Zone', action: 'navigate' as const, target: 'morning' },
-              { id: 'ask-vary', label: 'Why do steps vary?', action: 'suggest' as const, question: 'Why do my steps vary so much?' }
-            ],
-            reasoningChain: topic === 'prediction' ? generateReasoningChain(userQuestion, 'prediction') : undefined,
-            hypotheses: [],
-            patterns: [],
-            counterfactuals: [],
-            requiresUserInput: true,
-            uncertainty: "My forecast is based on limited data. Your context—like how you're feeling or what's on your calendar—would help me be more accurate.",
-            suggestedQuestions: [
-              'How accurate are your predictions?',
-              'What factors affect the forecast?',
-              'Can I still hit my goal?'
-            ]
-          },
-          {
-            content: `My forecast considers your sleep quality, calendar commitments, and weather patterns. Today's prediction reflects a combination of these factors. Remember, forecasts are probabilities, not certainties—you're always in control.`,
-            quickActions: [
-              { id: 'nav-morning', label: 'Adjust Forecast', action: 'navigate' as const, target: 'morning' },
-              { id: 'nav-plan', label: 'Plan for Success', action: 'navigate' as const, target: 'plan' }
-            ],
-            reasoningChain: topic === 'prediction' ? generateReasoningChain(userQuestion, 'prediction') : undefined,
-            hypotheses: [],
-            patterns: [],
-            counterfactuals: [],
-            requiresUserInput: true,
-            suggestedQuestions: [
-              'What if I want to exceed the forecast?',
-              'How do I improve my chances?',
-              'What factors matter most?'
-            ]
-          }
-        ]
-      },
-      {
-        // Topic 3: Poor sleep - 2 variants
+        // Topic 2: Poor sleep - 3 variants
         keywords: ['sleep', 'slept', 'sleeping', 'poorly', 'poor', 'bad', 'terrible', 'awful', 'last night', 'night', 'rest', 'tired', 'exhausted'],
         responses: [
           {
             content: `I can't see everything, but I did notice a later-than-usual bedtime and a high-stress marker from your evening. Those patterns often affect sleep. Does that match your sense of the night?`,
             quickActions: [
-              { id: 'ask-feel', label: 'How I felt', action: 'suggest' as const, question: 'Why did I feel so differently from what the data shows?' },
-              { id: 'nav-plan', label: 'Plan Better Sleep', action: 'navigate' as const, target: 'plan' }
+              { id: 'nav-plan', label: 'Plan Better Sleep', action: 'navigate' as const, target: 'plan' },
+              { id: 'nav-evening', label: 'Reflect on Today', action: 'navigate' as const, target: 'evening' }
             ],
             reasoningChain: topic === 'poor_sleep' ? generateReasoningChain(userQuestion, 'poor_sleep') : undefined,
             hypotheses: topic === 'poor_sleep' ? generateHypotheses('poor_sleep') : [],
@@ -590,8 +545,8 @@ export function ChatInterface({
           {
             content: `Sleep quality matters more than quantity sometimes. Even if the hours look low, how you felt when you woke up tells the real story. What was your experience this morning?`,
             quickActions: [
-              { id: 'ask-feel', label: 'Share my experience', action: 'suggest' as const, question: 'Why did I feel so differently from what the data shows?' },
-              { id: 'nav-plan', label: 'Improve Sleep', action: 'navigate' as const, target: 'plan' }
+              { id: 'nav-plan', label: 'Improve Sleep', action: 'navigate' as const, target: 'plan' },
+              { id: 'nav-dashboard', label: 'View Sleep Patterns', action: 'navigate' as const, target: 'dashboard' }
             ],
             reasoningChain: topic === 'poor_sleep' ? generateReasoningChain(userQuestion, 'poor_sleep') : undefined,
             hypotheses: topic === 'poor_sleep' ? generateHypotheses('poor_sleep') : [],
@@ -603,11 +558,28 @@ export function ChatInterface({
               'What helps with restful sleep?',
               'Why does sleep vary?'
             ]
+          },
+          {
+            content: `Looking at your recent patterns, I notice that nights with higher stress or later bedtimes tend to correlate with less restful sleep. What was happening yesterday evening that might have influenced your rest?`,
+            quickActions: [
+              { id: 'nav-evening', label: 'Evening Reflection', action: 'navigate' as const, target: 'evening' },
+              { id: 'ask-vary', label: 'Why do steps vary?', action: 'suggest' as const, question: 'Why do my steps vary so much?' }
+            ],
+            reasoningChain: topic === 'poor_sleep' ? generateReasoningChain(userQuestion, 'poor_sleep') : undefined,
+            hypotheses: topic === 'poor_sleep' ? generateHypotheses('poor_sleep') : [],
+            patterns: topic === 'poor_sleep' ? generatePatterns('poor_sleep') : [],
+            counterfactuals: topic === 'poor_sleep' ? generateCounterfactuals('poor_sleep') : [],
+            requiresUserInput: true,
+            suggestedQuestions: [
+              'How does stress affect sleep?',
+              'What bedtime routine helps?',
+              'Can I improve tonight?'
+            ]
           }
         ]
       },
       {
-        // Topic 4: Steps vary - 2 variants
+        // Topic 3: Steps vary - 3 variants
         keywords: ['vary', 'varies', 'variation', 'fluctuate', 'fluctuation', 'fluctuates', 'change', 'different', 'inconsistent', 'so much', 'why do', 'pattern'],
         responses: [
           {
@@ -643,52 +615,28 @@ export function ChatInterface({
               'How do I embrace variation?',
               "What's a healthy range?"
             ]
-          }
-        ]
-      },
-      {
-        // Topic 5: Feel different from data - 2 variants
-        keywords: ['feel', 'feeling', 'felt', 'differently', 'different', 'data', 'show', 'shows', 'number', 'actual', 'reality', 'vs', 'versus', 'emotion', 'emotional'],
-        responses: [
-          {
-            content: `That is the most important question. Data only captures pieces—like hours of sleep—but it misses the quality of your rest or your emotional state. Tell me a bit more about how you felt: was it mental fatigue, physical tiredness, or something else? Your experience is the full story.`,
-            quickActions: [
-              { id: 'ask-off', label: 'Having an off day', action: 'suggest' as const, question: 'Is it okay that I\'m having an off day?' },
-              { id: 'nav-evening', label: 'Reflect on Today', action: 'navigate' as const, target: 'evening' }
-            ],
-            reasoningChain: undefined,
-            hypotheses: [],
-            patterns: [],
-            counterfactuals: [],
-            requiresUserInput: true,
-            uncertainty: "I can only see numbers. Your emotional state, stress levels, and lived experience are invisible to me but crucial to understanding.",
-            suggestedQuestions: [
-              'How do I trust my feelings vs data?',
-              'Why does data sometimes feel wrong?',
-              'How can I balance both?'
-            ]
           },
           {
-            content: `Your feelings are valid, even when they don't match the numbers. Data is one lens; your lived experience is another. Both matter. What feels most true to you right now?`,
+            content: `Your activity naturally responds to life's rhythms—work schedules, social events, weather, and how you're feeling. This variation shows you're listening to your body rather than forcing rigid patterns.`,
             quickActions: [
-              { id: 'nav-evening', label: 'Reflect on Today', action: 'navigate' as const, target: 'evening' },
+              { id: 'nav-dashboard', label: 'Explore Patterns', action: 'navigate' as const, target: 'dashboard' },
               { id: 'ask-off', label: 'Is this normal?', action: 'suggest' as const, question: 'Is it okay that I\'m having an off day?' }
             ],
-            reasoningChain: undefined,
+            reasoningChain,
             hypotheses: [],
-            patterns: [],
+            patterns,
             counterfactuals: [],
             requiresUserInput: true,
             suggestedQuestions: [
-              'How do I reconcile data and feelings?',
-              'What if I feel great but data looks low?',
-              'How do I use both insights?'
+              'What factors influence variation most?',
+              'Should I aim for consistency?',
+              'How do I find my natural rhythm?'
             ]
           }
         ]
       },
       {
-        // Topic 6: Off day - 2 variants
+        // Topic 4: Off day - 3 variants
         keywords: ['okay', 'ok', 'off day', 'off', 'bad day', 'fine', 'alright', 'normal', 'struggle', 'struggling', 'hard', 'difficult', 'having'],
         responses: [
           {
@@ -724,6 +672,23 @@ export function ChatInterface({
               'How do I recover?',
               'What can I learn from this?'
             ]
+          },
+          {
+            content: `Every day doesn't need to be your best day. Off days teach you about your limits, your needs, and what your body is really asking for. That's valuable information.`,
+            quickActions: [
+              { id: 'nav-evening', label: 'Reflect on Today', action: 'navigate' as const, target: 'evening' },
+              { id: 'nav-dashboard', label: 'View Trends', action: 'navigate' as const, target: 'dashboard' }
+            ],
+            reasoningChain: undefined,
+            hypotheses: [],
+            patterns: [],
+            counterfactuals: [],
+            requiresUserInput: false,
+            suggestedQuestions: [
+              'How do I accept off days?',
+              'What patterns lead to off days?',
+              'How do I prepare for tomorrow?'
+            ]
           }
         ]
       }
@@ -737,26 +702,29 @@ export function ChatInterface({
         const selected = set.responses[Math.floor(Math.random() * set.responses.length)];
         const avgSleep = healthData.slice(-7).reduce((sum, d) => sum + d.sleep, 0) / Math.min(7, healthData.length);
         
-        // Generate appropriate data card based on topic
+        // Generate appropriate data card based on topic - only show for first variant to avoid repetition
         let dataCard: DataCard | undefined = undefined;
         if (todayData) {
-          if (topic === 'poor_sleep' || (lowerQ.includes('sleep') && !lowerQ.includes('step'))) {
-            dataCard = {
-              title: 'Last Night\'s Sleep',
-              value: todayData.sleep.toFixed(1),
-              unit: 'hours',
-              trend: todayData.sleep < avgSleep ? 'down' : todayData.sleep > avgSleep ? 'up' : 'stable',
-              context: `Your 7-day average is ${avgSleep.toFixed(1)} hours`
-            };
-          } else {
-            // Default to steps for step-related questions
-            dataCard = {
-              title: 'Today\'s Steps',
-              value: todayData.steps,
-              unit: 'steps',
-              trend: todayData.steps < avgSteps ? 'down' : 'up',
-              context: `Your 7-day average is ${Math.round(avgSteps)} steps`
-            };
+          const isFirstVariant = set.responses.indexOf(selected) === 0;
+          if (isFirstVariant) {
+            if (topic === 'poor_sleep' || (lowerQ.includes('sleep') && !lowerQ.includes('step'))) {
+              dataCard = {
+                title: 'Last Night\'s Sleep',
+                value: todayData.sleep.toFixed(1),
+                unit: 'hours',
+                trend: todayData.sleep < avgSleep ? 'down' : todayData.sleep > avgSleep ? 'up' : 'stable',
+                context: `Your 7-day average is ${avgSleep.toFixed(1)} hours`
+              };
+            } else if (topic === 'missed_goal' || topic === 'steps_vary') {
+              // Default to steps for step-related questions
+              dataCard = {
+                title: 'Today\'s Steps',
+                value: todayData.steps,
+                unit: 'steps',
+                trend: todayData.steps < avgSteps ? 'down' : 'up',
+                context: `Your 7-day average is ${Math.round(avgSteps)} steps`
+              };
+            }
           }
         }
         
@@ -1098,32 +1066,28 @@ export function ChatInterface({
         </div>
       )}
 
-      {/* 6 Topics - Always Visible */}
+      {/* 4 Topics - Always Visible as Text */}
       <div className={`${compact ? 'mb-3' : 'mb-4'} flex-shrink-0`}>
         <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2">
             <Lightbulb className="w-4 h-4 text-green-600 dark:text-green-400" />
-            <p className="text-sm font-medium">6 topics you can ask about:</p>
+            <p className="text-sm font-medium text-muted-foreground">Common questions:</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-            {[
-              'Missed step goal',
-              'Low step prediction',
-              'Poor sleep last night',
-              'Steps vary so much',
-              'Feel different from data',
-              'Having an off day'
-            ].map((topic, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSuggestedQuestion(`Why ${topic.toLowerCase()}?`)}
-                className="flex items-center gap-2 text-left hover:opacity-70 transition-opacity group"
-              >
-                <span className="text-green-600 dark:text-green-400 text-lg leading-none group-hover:scale-110 transition-transform">•</span>
-                <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{topic}</p>
-              </button>
-            ))}
-          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Try asking: <span 
+              onClick={() => handleSuggestedQuestion("Why didn't I meet my step goal today?")}
+              className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 cursor-pointer underline decoration-dotted"
+            >"Why didn't I meet my step goal today?"</span>, <span
+              onClick={() => handleSuggestedQuestion("Why did I sleep so poorly last night?")}
+              className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 cursor-pointer underline decoration-dotted"
+            >"Why did I sleep so poorly last night?"</span>, <span
+              onClick={() => handleSuggestedQuestion("Why do my steps vary so much?")}
+              className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 cursor-pointer underline decoration-dotted"
+            >"Why do my steps vary so much?"</span>, or <span
+              onClick={() => handleSuggestedQuestion("Is it okay that I'm having an off day?")}
+              className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 cursor-pointer underline decoration-dotted"
+            >"Is it okay that I'm having an off day?"</span>
+          </p>
         </Card>
       </div>
 

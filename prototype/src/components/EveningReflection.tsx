@@ -91,7 +91,7 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
   const eveningScenarios = [
     {
       id: 'A',
-      title: 'Scenario A—Underperforming + Rain',
+      title: 'Scenario A—Weather + Long Meeting',
       contextSections: [
         { label: 'Comfort Zone', content: 'Set at 5,800–7,200 steps' },
         { label: 'Actual Result', content: '4,510 steps achieved' },
@@ -110,7 +110,7 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
     },
     {
       id: 'B',
-      title: 'Scenario B—Overperforming + Sunshine',
+      title: 'Scenario B—Sunny Day + Open Afternoon',
       contextSections: [
         { label: 'Comfort Zone', content: 'Set at 7,000–8,500 steps' },
         { label: 'Actual Result', content: '11,230 steps achieved' },
@@ -129,7 +129,7 @@ export function EveningReflection({ forecasts, onSaveReflection, morningScenario
     },
     {
       id: 'C',
-      title: 'Scenario C—Flat Activity + Stress',
+      title: 'Scenario C—Heavy Stress + Poor Sleep',
       contextSections: [
         { label: 'Comfort Zone', content: 'Set at 6,000–7,000 steps' },
         { label: 'Actual Result', content: '3,220 steps achieved' },
